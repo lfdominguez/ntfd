@@ -90,7 +90,9 @@ instance Store WeatherClient where
 -- brittany-disable-next-binding
 renderTemplate :: WeatherData -> Text -> Either Error Text
 renderTemplate w t = do
+    -- Compile user provided template
     template <- first Parse $ compileMustacheText "weather template" $ fromStrict t
+    -- Render it
     case renderMustacheW template payload of
         ([]  , res) -> Right $ toStrict res
         (errs, _  ) -> Left $ Render errs
