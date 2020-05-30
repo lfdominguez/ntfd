@@ -96,21 +96,21 @@ renderTemplate w t = do
         (errs, _  ) -> Left $ Render errs
   where
     payload = object
-        [ "temp_celcius" .= (valueAs current Celcius :: Float)
-        , "temp_kelvin" .= (valueAs current Kelvin :: Float)
-        , "temp_fahrenheit" .= (valueAs current Fahrenheit :: Float)
-        , "temp_icon" .= (currentIcon w :: Char)
-        , "trend" .= (trend current forecast :: Char)
-        , "forecast_celcius" .= (valueAs forecast Celcius :: Float)
-        , "forecast_kelvin" .= (valueAs forecast Kelvin :: Float)
-        , "forecast_fahrenheit" .= (valueAs forecast Fahrenheit :: Float)
-        , "forecast_icon" .= (forecastIcon w :: Char)
+        [ "temp_celcius" .= valueAs Celcius current
+        , "temp_kelvin" .= valueAs Kelvin current
+        , "temp_fahrenheit" .= valueAs Fahrenheit current
+        , "temp_icon" .= currentIcon w
+        , "trend" .= trend current forecast
+        , "forecast_celcius" .= valueAs Celcius forecast
+        , "forecast_kelvin" .= valueAs Kelvin forecast
+        , "forecast_fahrenheit" .= valueAs Fahrenheit forecast
+        , "forecast_icon" .= forecastIcon w
         ]
     trend c f
         | c < f = '\59621' -- ^ trending up
         | c > f = '\59619' -- ^ trending down
         | otherwise = '\59620' -- ^ flat
-    valueAs temp target = let Temperature value _ = convert temp target in value
+    valueAs target temp = let Temperature value _ = convert temp target in value
     current = currentTemperature w
     forecast = forecastTemperature w
 
