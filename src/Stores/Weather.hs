@@ -8,6 +8,7 @@ where
 import Control.Concurrent.Async (mapConcurrently)
 import Control.Concurrent (newEmptyMVar, tryReadMVar, tryTakeMVar, putMVar, MVar)
 import Data.Aeson ((.=), object)
+import Data.Bifunctor (first)
 import Data.Text (Text)
 import Data.Text.Lazy (toStrict, fromStrict)
 import Text.Microstache (compileMustacheText, renderMustacheW, MustacheWarning)
@@ -88,15 +89,12 @@ instance Store WeatherClient where
 
 -- brittany-disable-next-binding
 renderTemplate :: WeatherData -> Text -> Either Error Text
-renderTemplate w t = case compileMustacheText "weather template" (fromStrict t) of
-    Left  e        -> Left $ Parse e
-    Right template -> case renderMustacheW template payload of
+renderTemplate w t = do
+    template <- first Parse $ compileMustacheText "weather template" $ fromStrict t
+    case renderMustacheW template payload of
         ([]  , res) -> Right $ toStrict res
         (errs, _  ) -> Left $ Render errs
   where
-    valueAs temp target = let Temperature value _ = convert temp target in value
-    current = currentTemperature w
-    forecast = forecastTemperature w
     payload = object
         [ "temp_celcius" .= (valueAs current Celcius :: Float)
         , "temp_kelvin" .= (valueAs current Kelvin :: Float)
@@ -112,6 +110,9 @@ renderTemplate w t = case compileMustacheText "weather template" (fromStrict t) 
         | c < f = '\59621' -- ^ trending up
         | c > f = '\59619' -- ^ trending down
         | otherwise = '\59620' -- ^ flat
+    valueAs temp target = let Temperature value _ = convert temp target in value
+    current = currentTemperature w
+    forecast = forecastTemperature w
 
 -- | Error types the store might return.
 data Error
