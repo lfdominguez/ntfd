@@ -25,7 +25,7 @@ data OwmResponse = OwmResponse
     }
     deriving (Show)
 
--- Fetch weather data from OpenWeatherMap
+-- Fetch weather data from OpenWeatherMap - Results are always in Celcius
 fetchOwm :: WeatherConfig -> QueryType -> IO (Either Error OwmResponse)
 fetchOwm cfg queryType = do
     baseRequest <- parseRequest "GET https://api.openweathermap.org/"
