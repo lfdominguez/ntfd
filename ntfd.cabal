@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: de6c9225da735c587e53fc0d808dc4825a282aaa3e11422f70514c05c3951f75
+-- hash: 1a51b03a76d7a1488928d1155b9d3aa8f08ef34178630110fdee02ce061ad6a2
 
 name:           ntfd
 version:        0.1.0.0
@@ -48,6 +48,8 @@ library
     , base >=4.7 && <5
     , bytestring
     , http-conduit
+    , microstache
+    , parsec
     , text
     , time
     , tomland
@@ -68,7 +70,9 @@ executable ntfd-exe
     , base >=4.7 && <5
     , bytestring
     , http-conduit
+    , microstache
     , ntfd
+    , parsec
     , text
     , time
     , tomland
@@ -94,7 +98,9 @@ test-suite ntfd-test
     , bytestring
     , hspec
     , http-conduit
+    , microstache
     , ntfd
+    , parsec
     , text
     , time
     , tomland

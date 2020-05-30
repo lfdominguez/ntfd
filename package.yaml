@@ -29,6 +29,8 @@ dependencies:
 - tomland
 - async
 - http-conduit
+- microstache
+- parsec
 
 default-extensions:
 - OverloadedStrings
