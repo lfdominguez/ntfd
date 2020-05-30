@@ -36,7 +36,7 @@ default-extensions:
 - OverloadedStrings
 - RecordWildCards
 - NamedFieldPuns
-- BangPatterns
+- ScopedTypeVariables
 
 ghc-options:
 - -Wall

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1a51b03a76d7a1488928d1155b9d3aa8f08ef34178630110fdee02ce061ad6a2
+-- hash: 2cbd0e2499e082789f9e8269ee0be954bed441f58c3648216053e66322d62947
 
 name:           ntfd
 version:        0.1.0.0
@@ -40,7 +40,7 @@ library
       Paths_ntfd
   hs-source-dirs:
       src
-  default-extensions: OverloadedStrings RecordWildCards NamedFieldPuns BangPatterns
+  default-extensions: OverloadedStrings RecordWildCards NamedFieldPuns ScopedTypeVariables
   ghc-options: -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat -Widentities -Wredundant-constraints -Wmissing-export-lists -Wpartial-fields
   build-depends:
       aeson
@@ -62,7 +62,7 @@ executable ntfd-exe
       Paths_ntfd
   hs-source-dirs:
       app
-  default-extensions: OverloadedStrings RecordWildCards NamedFieldPuns BangPatterns
+  default-extensions: OverloadedStrings RecordWildCards NamedFieldPuns ScopedTypeVariables
   ghc-options: -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat -Widentities -Wredundant-constraints -Wmissing-export-lists -Wpartial-fields -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
@@ -85,11 +85,12 @@ test-suite ntfd-test
   other-modules:
       Spec.Clients.OpenWeatherMap
       Spec.Config
+      Spec.Stores.Weather
       Spec.Weather
       Paths_ntfd
   hs-source-dirs:
       test
-  default-extensions: OverloadedStrings RecordWildCards NamedFieldPuns BangPatterns
+  default-extensions: OverloadedStrings RecordWildCards NamedFieldPuns ScopedTypeVariables
   ghc-options: -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat -Widentities -Wredundant-constraints -Wmissing-export-lists -Wpartial-fields -Wno-incomplete-uni-patterns -Wno-missing-export-lists -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson

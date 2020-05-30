@@ -22,11 +22,11 @@ import Config (WeatherConfig(..))
 -- | Query and update Weather data.
 class Store s where
     -- | Initialize a Weather store.
-    init :: WeatherConfig -> IO s
+    initWeatherStore :: WeatherConfig -> IO s
     -- | Synchronize weather data.
     syncForecast :: s -> IO (Either Error ())
     -- | Get rendered template.
-    displayForecast :: s -> IO (Either Error Text)
+    getRenderedTemplate :: s -> IO (Either Error Text)
 
 -- Main client, implements the Store typeclass
 data WeatherClient = WeatherClient
@@ -49,9 +49,9 @@ data WeatherData = WeatherData
     }
 
 instance Store WeatherClient where
-    init config = do
+    initWeatherStore config = do
         internalState <- newEmptyMVar
-        pure WeatherClient { config, internalState }
+        pure WeatherClient { .. }
 
     syncForecast s = do
         [current, forecast] <- mapConcurrently (fetchOwm cfg) [Current, Forecast]
@@ -81,7 +81,7 @@ instance Store WeatherClient where
         toTemperature res = Temperature (owmTemperature res) Celcius
         toIcon res = toWeatherIcon $ owmIcon res
 
-    displayForecast s = do
+    getRenderedTemplate s = do
         state <- tryReadMVar $ internalState s
         pure $ case state of
             Nothing -> Left Unsynchronized
@@ -112,7 +112,7 @@ renderTemplate w t = do
         | c < f = '\59621' -- ^ trending up
         | c > f = '\59619' -- ^ trending down
         | otherwise = '\59620' -- ^ flat
-    valueAs target temp = let Temperature value _ = convert temp target in value
+    valueAs target temp = let Temperature value _ = convert temp target in round value :: Int
     current = currentTemperature w
     forecast = forecastTemperature w
 
