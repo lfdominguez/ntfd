@@ -6,9 +6,12 @@ module Config.Weather
 where
 
 import Data.Bifunctor (first)
+import Data.Fixed (Fixed(MkFixed))
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
+import Data.Time.Clock (secondsToNominalDiffTime, NominalDiffTime)
 import Data.ByteString (ByteString)
+import Numeric.Natural (Natural)
 import Toml ((.=), decode, TomlCodec, DecodeException)
 import qualified Toml
 
@@ -32,6 +35,7 @@ applyEnvFallbacks env toml = case (E.weatherApiKey env, apiKey toml) of
         { weatherEnabled  = enabled toml'
         , weatherApiKey   = encodeUtf8 k
         , weatherCityId   = encodeUtf8 $ cityId toml'
+        , weatherSyncFreq = secondsToNominalDiffTime $ MkFixed $ toInteger $ syncFrequency toml'
         , weatherTemplate = template toml'
         }
 
@@ -40,6 +44,7 @@ data WeatherConfig = WeatherConfig
     { weatherEnabled :: Bool
     , weatherApiKey :: ByteString
     , weatherCityId :: ByteString
+    , weatherSyncFreq :: NominalDiffTime
     , weatherTemplate :: Text
     } deriving (Show)
 
@@ -48,6 +53,7 @@ data TomlWeatherConfig = TomlWeatherConfig
     { enabled :: Bool
     , apiKey :: Maybe Text -- ^ Optional in the config file, can be specified via env variables
     , cityId :: Text
+    , syncFrequency :: Natural
     , template :: Text
     }
 
@@ -62,4 +68,5 @@ weatherCodec = TomlWeatherConfig
     <$> Toml.bool "enabled" .= enabled
     <*> Toml.dioptional (Toml.text "api_key") .= apiKey
     <*> Toml.text "city_id" .= cityId
+    <*> Toml.natural "sync_frequency" .= syncFrequency
     <*> Toml.text "display" .= template

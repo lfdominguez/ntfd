@@ -4,6 +4,7 @@ import Control.Concurrent.Async (mapConcurrently)
 import Data.ByteString.Char8 (pack)
 import Data.Either (isRight)
 import Data.Maybe (fromJust)
+import Data.Time.Clock (secondsToNominalDiffTime)
 import System.Environment (lookupEnv)
 import Test.Hspec
 
@@ -17,6 +18,7 @@ defaultCfg = do
         { weatherEnabled  = True
         , weatherApiKey   = fromJust $ pack <$> apiKey
         , weatherCityId   = "6077243"
+        , weatherSyncFreq = secondsToNominalDiffTime 1800
         , weatherTemplate =
             "{{ temp_icon }} {{ temp_celcius }}°C {{ trend }} {{ forecast_icon }} {{ forecast_celcius }}°C"
         }
