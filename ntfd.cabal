@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2cbd0e2499e082789f9e8269ee0be954bed441f58c3648216053e66322d62947
+-- hash: 39352d9114ec9a913ee267106fda6228434e2554d2b6ca04ea8416b0224ae0f9
 
 name:           ntfd
 version:        0.1.0.0
@@ -32,7 +32,6 @@ library
       Config.Env
       Config.Twitch
       Config.Weather
-      Lib
       Stores.Twitch
       Stores.Weather
       Types.Weather
@@ -47,6 +46,8 @@ library
     , async
     , base >=4.7 && <5
     , bytestring
+    , dbus
+    , directory
     , http-conduit
     , microstache
     , parsec
@@ -69,6 +70,8 @@ executable ntfd-exe
     , async
     , base >=4.7 && <5
     , bytestring
+    , dbus
+    , directory
     , http-conduit
     , microstache
     , ntfd
@@ -97,6 +100,8 @@ test-suite ntfd-test
     , async
     , base >=4.7 && <5
     , bytestring
+    , dbus
+    , directory
     , hspec
     , http-conduit
     , microstache

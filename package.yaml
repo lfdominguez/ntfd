@@ -31,6 +31,8 @@ dependencies:
 - http-conduit
 - microstache
 - parsec
+- dbus
+- directory
 
 default-extensions:
 - OverloadedStrings

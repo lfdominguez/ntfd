@@ -6,7 +6,6 @@ module Config.Weather
 where
 
 import Data.Bifunctor (first)
-import Data.Fixed (Fixed(..))
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
 import Data.Time.Clock (secondsToNominalDiffTime, NominalDiffTime)
@@ -38,7 +37,7 @@ applyEnvFallbacks env toml = case (E.weatherApiKey env, apiKey toml) of
         , weatherSyncFreq = toDiffTime $ syncFrequency toml'
         , weatherTemplate = template toml'
         }
-    toDiffTime = secondsToNominalDiffTime . MkFixed . toInteger
+    toDiffTime = secondsToNominalDiffTime . fromInteger . toInteger
 
 -- | OpenWeatherMap configuration options required by the application
 data WeatherConfig = WeatherConfig

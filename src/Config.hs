@@ -1,6 +1,7 @@
 module Config
     ( loadConfig
     , Config(..)
+    , ConfigError(..)
     , module Config.Twitch
     , module Config.Weather
     )
@@ -27,3 +28,8 @@ loadConfig path = do
   where
     builder env content =
         Config { twitchCfg = loadTwitchConfig content, weatherCfg = loadWeatherConfig env content }
+
+data ConfigError
+    = WeatherConfigErr WeatherCfgError
+    | TwitchConfigErr TwitchCfgError
+    deriving (Show)

@@ -21,12 +21,13 @@ import Config (WeatherConfig(..))
 
 -- | Query and update Weather data.
 class Store s where
-    -- | Initialize a Weather store.
     initWeatherStore :: WeatherConfig -> IO s
-    -- | Synchronize weather data.
     syncForecast :: s -> IO (Either Error ())
-    -- | Get rendered template.
     getRenderedTemplate :: s -> IO (Either Error Text)
+    getCurrentTemperature :: s -> IO (Maybe Temperature)
+    getCurrentIcon :: s -> IO (Maybe Char)
+    getForecastTemperature :: s -> IO (Maybe Temperature)
+    getForecastIcon :: s -> IO (Maybe Char)
 
 -- Main client, implements the Store typeclass
 data WeatherClient = WeatherClient
@@ -86,6 +87,22 @@ instance Store WeatherClient where
         pure $ case state of
             Nothing -> Left Unsynchronized
             Just w  -> renderedTemplate w
+
+    getCurrentTemperature s = do
+        state <- tryReadMVar $ internalState s
+        pure $ currentTemperature . weatherData <$> state
+
+    getCurrentIcon s = do
+        state <- tryReadMVar $ internalState s
+        pure $ currentIcon . weatherData <$> state
+
+    getForecastTemperature s = do
+        state <- tryReadMVar $ internalState s
+        pure $ forecastTemperature . weatherData <$> state
+
+    getForecastIcon s = do
+        state <- tryReadMVar $ internalState s
+        pure $ forecastIcon . weatherData <$> state
 
 -- brittany-disable-next-binding
 renderTemplate :: WeatherData -> Text -> Either Error Text

@@ -36,4 +36,3 @@ convert (Temperature v Celcius   ) Fahrenheit = Temperature (v * 9 / 5 + 32) Fah
 convert (Temperature v Fahrenheit) Kelvin     = Temperature ((v + 459.67) * 5 / 9) Kelvin
 convert (Temperature v Fahrenheit) Celcius    = Temperature ((v - 32) * 5 / 9) Celcius
 convert original                   _          = original
-
