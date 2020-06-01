@@ -66,7 +66,7 @@ weatherService dbusClient config = do
         sleep $ weatherSyncFreq config
   where
     interface s = defaultInterface
-        { interfaceName       = "io.ntfd.openweathermap"
+        { interfaceName       = "io.ntfd.openweathermap.strings"
         , interfaceMethods    = methods s
         , interfaceProperties = properties s
         }

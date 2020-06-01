@@ -15,3 +15,36 @@ It will implement integration with several services such as:
 Probably in that order. \
 The daemon will be queryable via D-Bus, but stay loosely coupled so that new interfaces can be added.
 
+dbus-send --dest=io.ntfd.services --print-reply \
+    /weather org.freedesktop.DBus.Properties.Get \
+    string:'io.ntfd.openweathermap.strings' string:'CurrentIcon'
+
+gdbus call --session \
+    --dest io.ntfd.services \
+    --object-path /weather \
+    --method org.freedesktop.DBus.Properties.Get  \
+    io.ntfd.openweathermap.strings \
+    CurrentIcon
+
+dbus-send --dest=io.ntfd.services --print-reply \
+    /weather io.ntfd.openweathermap.strings.CurrentTemperature string:''
+
+gdbus call --session \
+    --dest io.ntfd.services \
+    --object-path /weather \
+    --method io.ntfd.openweathermap.strings.CurrentTemperature \
+    celcius
+
+## DBus examples
+Current temperature in celcius:
+```sh
+dbus-send --dest=io.ntfd.services --print-reply=literal \
+    /weather io.ntfd.openweathermap.strings.CurrentTemperature string:'celcius'
+```
+
+Rendered version of the configured template:
+```sh
+dbus-send --dest=io.ntfd.services --print-reply=literal \
+    /weather io.ntfd.openweathermap.strings.CurrentTemperature string:'celcius'
+```
+
