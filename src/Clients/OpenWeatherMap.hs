@@ -28,7 +28,7 @@ data OwmResponse = OwmResponse
 -- Fetch weather data from OpenWeatherMap - Results are always in Celcius
 fetchOwm :: WeatherConfig -> QueryType -> IO (Either Error OwmResponse)
 fetchOwm cfg queryType = do
-    baseRequest <- parseRequest "GET https://api.openweathermap.org/"
+    baseRequest <- parseRequest "GET http://api.openweathermap.org/"
     let request = setRequestPath (endpoint queryType) $ setRequestQueryString params baseRequest
     res <- try $ httpLbs request
     pure $ case res of

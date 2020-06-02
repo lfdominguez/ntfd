@@ -43,9 +43,9 @@ main = do
 
     -- Connect to DBus
     client        <- connectSession
-    requestResult <- requestName client "io.ntfd.services" []
+    requestResult <- requestName client "io.ntfd" []
     when (requestResult /= NamePrimaryOwner) $ do
-        putStrLn "Another service is connected to DBus as \"io.ntfd.services\""
+        putStrLn "Another service is connected to DBus as \"io.ntfd\""
         exitFailure
 
     -- Prepare services
@@ -66,7 +66,7 @@ weatherService dbusClient config = do
         sleep $ weatherSyncFreq config
   where
     interface s = defaultInterface
-        { interfaceName       = "io.ntfd.openweathermap.strings"
+        { interfaceName       = "openweathermap.strings"
         , interfaceMethods    = methods s
         , interfaceProperties = properties s
         }

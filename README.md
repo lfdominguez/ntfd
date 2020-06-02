@@ -15,36 +15,30 @@ It will implement integration with several services such as:
 Probably in that order. \
 The daemon will be queryable via D-Bus, but stay loosely coupled so that new interfaces can be added.
 
-dbus-send --dest=io.ntfd.services --print-reply \
-    /weather org.freedesktop.DBus.Properties.Get \
-    string:'io.ntfd.openweathermap.strings' string:'CurrentIcon'
+## Usage
+Here are a few example DBus queries you can use from shell scripts, you'll need [`jq`](https://www.archlinux.org/packages/community/x86_64/jq/) to run the examples:
 
-gdbus call --session \
-    --dest io.ntfd.services \
-    --object-path /weather \
-    --method org.freedesktop.DBus.Properties.Get  \
-    io.ntfd.openweathermap.strings \
-    CurrentIcon
-
-dbus-send --dest=io.ntfd.services --print-reply \
-    /weather io.ntfd.openweathermap.strings.CurrentTemperature string:''
-
-gdbus call --session \
-    --dest io.ntfd.services \
-    --object-path /weather \
-    --method io.ntfd.openweathermap.strings.CurrentTemperature \
-    celcius
-
-## DBus examples
-Current temperature in celcius:
+DBus properties:
 ```sh
-dbus-send --dest=io.ntfd.services --print-reply=literal \
-    /weather io.ntfd.openweathermap.strings.CurrentTemperature string:'celcius'
+# Get the current weather icon
+busctl --user -j get-property io.ntfd /weather openweathermap.strings CurrentIcon | jq -r .data
+
+# Rendered version of the configured weather template:
+busctl --user -j get-property io.ntfd /weather openweathermap.strings RenderedTemplate | jq -r .data
 ```
 
-Rendered version of the configured template:
+DBus methods:
 ```sh
-dbus-send --dest=io.ntfd.services --print-reply=literal \
-    /weather io.ntfd.openweathermap.strings.CurrentTemperature string:'celcius'
+# Supported units are "celcius", "kelvin" and "fahrenheit":
+
+# Current temperature in celcius:
+busctl --user -j call io.ntfd /weather openweathermap.strings CurrentTemperature s "celcius" | jq -r '.data[0]'
+
+# Forecast temperature in fahrenheit:
+busctl --user -j call io.ntfd /weather openweathermap.strings CurrentTemperature s "fahrenheit" | jq -r '.data[0]'
 ```
 
+To explore the DBus API, I recommend [`d-feet`](https://www.archlinux.org/packages/community/any/d-feet/), a graphical tool to explore DBus interfaces. \
+In `d-feet`, go to the Session Bus tab from the top bar, and look for `io.ntfd`.
+
+The [`busctl` documentation](https://www.freedesktop.org/software/systemd/man/busctl.html) might also come in handy, especially for method calls.
