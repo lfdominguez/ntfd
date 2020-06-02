@@ -51,11 +51,13 @@ main = do
     -- Prepare services
     let weatherSvc = first WeatherConfigErr $ weatherService client <$> weatherCfg config
 
-    -- Spawn threads and wait forever, or until one of them fail
+    -- Spawn threads and wait forever, or until one of them fails
     services <- mapM async $ rights [weatherSvc]
     _        <- waitAny services
     exitFailure
 
+-- "all strings" version of the weather DBus API, this is meant to be convenient to use
+-- from shell scripts, errors are mapped to empty strings (since DBus has no null/empty type)
 weatherService :: Client -> WeatherConfig -> IO ()
 weatherService dbusClient config = do
     putStrLn "Started OpenWeatherMap synchronization service."
@@ -82,7 +84,7 @@ weatherService dbusClient config = do
 sleep :: NominalDiffTime -> IO ()
 sleep = threadDelay . toMicroSeconds where toMicroSeconds = (1000000 *) . fromInteger . round
 
--- The following functions helps mapping our data types to DBus
+-- The following functions help mapping our data types to work around DBus' lack of null type
 fromEither :: (Monoid t) => Either e t -> t
 fromEither (Left  _) = mempty
 fromEither (Right t) = t
