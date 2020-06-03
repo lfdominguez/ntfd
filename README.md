@@ -4,18 +4,26 @@ A work in progress notification daemon.
 `ntfd` synchronizes with different services and offers synchronous APIs for desktop integration via D-Bus. \
 It can be used as a data source for [Polybar](https://github.com/polybar/polybar), [Rofi](https://github.com/davatorium/rofi) or any other similar tool.
 
-It will implement integration with several services such as:
-- OperweatherMap (current weather, forecast, alerts ?, should re-implement [`polybar-forecast`](https://github.com/kamek-pf/polybar-forecast))
-- Github (unread notifications count, live notifications ?)
-- Twitch (followed streams state changes and count, rofi integration)
-- Gmail (live notifications, unread messages count, multi account support)
-- Facebook (live messages, unread notifications count)
-- Reddit (?)
+## Installation
+Arch users can install `ntfd` from the AUR. \
+Instructions to build from source can be found at the bottom of the README.
 
-Probably in that order. \
-The daemon will be queryable via D-Bus, but stay loosely coupled so that new interfaces can be added.
+## Configuration
+If you installed from the AUR, just edit `~/.config/ntfd/config.toml` as you need. \
+Keep scrolling for module specific instructions.
+
+If you're building from source, copy `config.toml` into your config directory, then edit it to enable what you need:
+```sh
+mkdir -p ~/.config/ntfd
+cp config.toml ~/.config/ntfd
+```
 
 ## Usage
+First, make sure `ntfd` is running in the background. You can start it at the begining of you session:
+```sh
+ntfd &
+```
+
 Here are a few example DBus queries you can use from shell scripts, you'll need [`jq`](https://www.archlinux.org/packages/community/x86_64/jq/) to run the examples:
 
 DBus properties:
@@ -42,3 +50,53 @@ To explore the DBus API, I recommend [`d-feet`](https://www.archlinux.org/packag
 In `d-feet`, go to the Session Bus tab from the top bar, and look for `io.ntfd`.
 
 The [`busctl` documentation](https://www.freedesktop.org/software/systemd/man/busctl.html) might also come in handy, especially for method calls.
+
+## Weather module
+<p align="center">
+    <img src="https://github.com/kamek-pf/ntfd/blob/master/screenshots/weather-polybar.png" />
+</p>
+
+Edit the `~/.config/ntfd/config.toml` and follow the instructions. \
+For Polybar integration like in the example, update your Polybar config like so:
+```
+[module/weather]
+type = custom/script
+exec = busctl --user -j get-property io.ntfd /weather openweathermap.strings RenderedTemplate | jq -r .data
+interval = 300
+label-font = 3
+```
+Don't forget to add Weather Icons to your config or it won't render correctly:
+```
+...
+font-2 = Weather Icons:size=12;0
+...
+```
+
+## Roadmap
+Integration with the following services is planned:
+- [x] OperweatherMap
+    - [x] Current weather, forecast
+    - [x] Template rendering for Polybar integration
+    - [x] Re-implement [`polybar-forecast`](https://github.com/kamek-pf/polybar-forecast))
+    - [ ] Alerts through notifications (?)
+- [ ] Github
+    - [ ] Unread notifications count
+    - [ ] Live notifications (?)
+- [ ] Twitch
+    - [ ] Live streams count (followed by the user)
+    - [ ] Rofi integration with [`mpv`](https://mpv.io/)
+- [ ] Gmail
+    - [ ] Live notifications
+    - [ ] Unread messages count, multi account support
+- [ ] Facebook (?)
+    - [ ] Live messages (?)
+    - [ ] Unread notifications count (?)
+- [ ] Reddit (?)
+
+## Build from source
+You can setup a Stack toolchain to build the project, or use Docker to build a statically linked executable:
+```sh
+docker build -t kamek-pf/ntfd .
+docker run --rm -ti -v $(pwd):/mnt kamek-pf/ntfd /bin/sh -c 'cp ntfd /mnt'
+```
+The binary will be available as `ntfd` from the project's root.

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 39352d9114ec9a913ee267106fda6228434e2554d2b6ca04ea8416b0224ae0f9
+-- hash: 1f72658c3d27b9759b9bcc9688b7f10607d2c64ae02ef58db948163dba04ca91
 
 name:           ntfd
 version:        0.1.0.0
@@ -52,19 +52,20 @@ library
     , microstache
     , parsec
     , text
+    , text-show
     , time
     , tomland
     , vector
   default-language: Haskell2010
 
-executable ntfd-exe
+executable ntfd
   main-is: Main.hs
   other-modules:
       Paths_ntfd
   hs-source-dirs:
       app
   default-extensions: OverloadedStrings RecordWildCards NamedFieldPuns ScopedTypeVariables
-  ghc-options: -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat -Widentities -Wredundant-constraints -Wmissing-export-lists -Wpartial-fields -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat -Widentities -Wredundant-constraints -Wmissing-export-lists -Wpartial-fields
   build-depends:
       aeson
     , async
@@ -77,6 +78,7 @@ executable ntfd-exe
     , ntfd
     , parsec
     , text
+    , text-show
     , time
     , tomland
     , vector
@@ -108,6 +110,7 @@ test-suite ntfd-test
     , ntfd
     , parsec
     , text
+    , text-show
     , time
     , tomland
     , vector

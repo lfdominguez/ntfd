@@ -8,7 +8,7 @@ import Control.Concurrent (threadDelay)
 import Control.Monad (forever, when)
 import Data.Bifunctor (first)
 import Data.Either (rights)
-import Data.Text (pack, Text)
+import Data.Text (Text)
 import Data.Time.Clock (NominalDiffTime)
 import DBus.Client
     ( autoMethod
@@ -89,9 +89,9 @@ fromEither :: (Monoid t) => Either e t -> t
 fromEither (Left  _) = mempty
 fromEither (Right t) = t
 
-fromIcon :: Maybe Char -> Text
+fromIcon :: Maybe Char -> String
 fromIcon Nothing  = ""
-fromIcon (Just c) = pack $ "" ++ [c]
+fromIcon (Just c) = "" ++ [c]
 
 currentTemperature :: WS.Store c => c -> Text -> IO String
 currentTemperature client unit = do

@@ -5,4 +5,4 @@ cradle:
     - path: ./src
       component: "ntfd:lib"
     - path: ./app
-      component: "ntfd:exe:ntfd-exe"
+      component: "ntfd:exe:ntfd"
