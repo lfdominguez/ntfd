@@ -56,6 +56,8 @@ The [`busctl` documentation](https://www.freedesktop.org/software/systemd/man/bu
     <img src="./screenshots/weather-polybar.png" />
 </p>
 
+In this example, the first number is the current temperature and the second one is a 3 hour forecast. \
+The output is fully configurable via templating, you can also query individual values. \
 Edit the `~/.config/ntfd/config.toml` and follow the instructions. \
 For Polybar integration like in the example, update your Polybar config like so:
 ```
