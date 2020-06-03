@@ -53,7 +53,7 @@ The [`busctl` documentation](https://www.freedesktop.org/software/systemd/man/bu
 
 ## Weather module
 <p align="center">
-    <img src="https://github.com/kamek-pf/ntfd/blob/master/screenshots/weather-polybar.png" />
+    <img src="./screenshots/weather-polybar.png" />
 </p>
 
 Edit the `~/.config/ntfd/config.toml` and follow the instructions. \
