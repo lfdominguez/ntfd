@@ -21,13 +21,28 @@ import Config (WeatherConfig(..))
 
 -- | Query and update Weather data.
 class Store s where
+    -- | Initialize the store
     initWeatherStore :: WeatherConfig -> IO s
+    -- | Synchronize local data with the weather service
     syncForecast :: s -> IO (Either Error ())
+    -- | Get a rendered version of the configured template
     getRenderedTemplate :: s -> IO (Either Error Text)
+    -- | Get current temperature
     getCurrentTemperature :: s -> IO (Maybe Temperature)
-    getCurrentIcon :: s -> IO (Maybe Char)
+    -- | Get forecast temperature
     getForecastTemperature :: s -> IO (Maybe Temperature)
-    getForecastIcon :: s -> IO (Maybe Char)
+    -- | Get current character icon from the WeatherIcon font
+    getCurrentCharIcon :: s -> IO (Maybe Char)
+    -- | Get forecast character icon from the WeatherIcon font
+    getForecastCharIcon :: s -> IO (Maybe Char)
+    -- | Get forecast description in the configured language
+    getCurrentDescription :: s -> IO (Maybe Text)
+    -- | Get forecast description in the configured language
+    getForecastDescription :: s -> IO (Maybe Text)
+    -- | Get current symbolic icon name according to the Icon Theme Specification
+    getCurrentSymbolic :: s -> IO (Maybe Text)
+    -- | Get forecast symbolic icon name according to the Icon Theme Specification
+    getForecastSymbolic :: s -> IO (Maybe Text)
 
 -- Main client, implements the Store typeclass
 data WeatherClient = WeatherClient
