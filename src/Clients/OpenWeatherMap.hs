@@ -1,5 +1,7 @@
 module Clients.OpenWeatherMap
     ( fetchOwm
+    , isDegradedConditions
+    , toSymbolicName
     , toWeatherIcon
     , Error(..)
     , OwmResponse(..)
@@ -20,7 +22,9 @@ import Config (WeatherConfig(..))
 
 -- OpenWeatherMap response to API calls
 data OwmResponse = OwmResponse
-    { owmTemperature :: Float
+    { owmStatus :: Int
+    , owmTemperature :: Float
+    , owmDescription :: Text
     , owmIcon :: Text
     }
     deriving (Show)
@@ -68,6 +72,15 @@ toWeatherIcon i
     | i == "50n" = '\61514' -- Fog - night
     | otherwise = '\61453'  -- ??
 
+-- More details here: https://specifications.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html
+-- brittany-disable-next-binding
+toSymbolicName :: Int -> Text
+toSymbolicName status = undefined
+
+-- We need to know when we're transitioning into degraded weather conditions
+isDegradedConditions :: Int -> Int -> Bool
+isDegradedConditions = undefined
+
 parseResponse :: ByteString -> QueryType -> Either Error OwmResponse
 parseResponse bytes queryType = do
     value <- first InvalidJson $ eitherDecode bytes
@@ -82,7 +95,9 @@ currentParser :: Value -> Parser OwmResponse
 currentParser = withObject "weather" $ \o -> do
     main           <- o .: "main"
     weather        <- weatherParser $ Object o
+    owmStatus      <- weather .: "id"
     owmTemperature <- main .: "temp"
+    owmDescription <- weather .: "description"
     owmIcon        <- weather .: "icon"
     return OwmResponse { .. }
 
@@ -96,7 +111,9 @@ forecastParser = withObject "forecast" $ \o -> do
         Nothing -> fail "no forecast received"
     main           <- root .: "main"
     weather        <- weatherParser $ Object root
+    owmStatus      <- weather .: "id"
     owmTemperature <- main .: "temp"
+    owmDescription <- weather .: "description"
     owmIcon        <- weather .: "icon"
     return OwmResponse { .. }
 

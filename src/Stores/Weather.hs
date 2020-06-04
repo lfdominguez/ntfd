@@ -15,7 +15,8 @@ import Text.Microstache (compileMustacheText, renderMustacheW, MustacheWarning)
 import Text.Parsec (ParseError)
 
 import qualified Clients.OpenWeatherMap as Owm
-import Clients.OpenWeatherMap (fetchOwm, toWeatherIcon, OwmResponse(..), QueryType(..))
+import Clients.OpenWeatherMap
+    (fetchOwm, isDegradedConditions, toSymbolicName, toWeatherIcon, OwmResponse(..), QueryType(..))
 import Types.Weather (convert, Temperature(..), Unit(..))
 import Config (WeatherConfig(..))
 
@@ -23,19 +24,20 @@ import Config (WeatherConfig(..))
 class Store s where
     -- | Initialize the store
     initWeatherStore :: WeatherConfig -> IO s
-    -- | Synchronize local data with the weather service
-    syncForecast :: s -> IO (Either Error ())
+    -- | Synchronize local data with the weather service.
+    -- Boolean value can be used to know whether or not notifications should be sent.
+    syncForecast :: s -> IO (Either Error Bool)
     -- | Get a rendered version of the configured template
     getRenderedTemplate :: s -> IO (Either Error Text)
     -- | Get current temperature
     getCurrentTemperature :: s -> IO (Maybe Temperature)
     -- | Get forecast temperature
     getForecastTemperature :: s -> IO (Maybe Temperature)
-    -- | Get current character icon from the WeatherIcon font
-    getCurrentCharIcon :: s -> IO (Maybe Char)
-    -- | Get forecast character icon from the WeatherIcon font
-    getForecastCharIcon :: s -> IO (Maybe Char)
-    -- | Get forecast description in the configured language
+    -- | Get current icon from the WeatherIcon font
+    getCurrentIcon :: s -> IO (Maybe Char)
+    -- | Get forecast icon from the WeatherIcon font
+    getForecastIcon :: s -> IO (Maybe Char)
+    -- | Get current description in the configured language
     getCurrentDescription :: s -> IO (Maybe Text)
     -- | Get forecast description in the configured language
     getForecastDescription :: s -> IO (Maybe Text)
@@ -58,10 +60,16 @@ data InternalState = InternalState
 
 -- Actual weather data
 data WeatherData = WeatherData
-    { currentTemperature :: Temperature
-    , currentIcon :: Char
+    { currentStatus :: Int
+    , forecastStatus :: Int
+    , currentTemperature :: Temperature
     , forecastTemperature :: Temperature
+    , currentIcon :: Char
     , forecastIcon :: Char
+    , currentDescription :: Text
+    , forecastDescription :: Text
+    , currentSymbolic :: Text
+    , forecastSymbolic :: Text
     }
 
 instance Store WeatherClient where
@@ -75,17 +83,23 @@ instance Store WeatherClient where
             -- When both calls succeed, we update the store
             (Right c, Right f) -> do
                 -- Build new state
-                let currentTemperature  = toTemperature c
-                    currentIcon         = toIcon c
+                let currentStatus       = owmStatus c
+                    forecastStatus      = owmStatus f
+                    currentTemperature  = toTemperature c
                     forecastTemperature = toTemperature f
+                    currentIcon         = toIcon c
                     forecastIcon        = toIcon f
-                    weatherData         = WeatherData { .. }
-                    renderedTemplate    = renderTemplate weatherData template
-                    state               = InternalState { .. }
+                    currentDescription  = owmDescription c
+                    forecastDescription = owmDescription f
+                    currentSymbolic     = toSymbolicName currentStatus
+                    forecastSymbolic    = toSymbolicName forecastStatus
+                    wData               = WeatherData { .. }
+                    renderedTemplate    = renderTemplate wData template
+                    state               = InternalState { weatherData = wData, .. }
                 -- Update store
-                _ <- tryTakeMVar mvar
+                oldState <- tryTakeMVar mvar
                 putMVar mvar state
-                pure $ Right ()
+                pure $ Right $ shouldNotify (weatherData <$> oldState) forecastStatus
             -- Report failure otherwise
             (Left c, Left f) -> pure $ Left $ Owm [c, f]
             (Left c, _     ) -> pure $ Left $ Owm [c]
@@ -96,6 +110,8 @@ instance Store WeatherClient where
         template = weatherTemplate cfg
         toTemperature res = Temperature (owmTemperature res) Celcius
         toIcon res = toWeatherIcon $ owmIcon res
+        shouldNotify Nothing newStatus = newStatus < 800
+        shouldNotify (Just WeatherData { forecastStatus = old }) new = isDegradedConditions old new
 
     getRenderedTemplate s = do
         state <- tryReadMVar $ internalState s
@@ -107,6 +123,14 @@ instance Store WeatherClient where
         state <- tryReadMVar $ internalState s
         pure $ currentTemperature . weatherData <$> state
 
+    getCurrentDescription s = do
+        state <- tryReadMVar $ internalState s
+        pure $ currentDescription . weatherData <$> state
+
+    getCurrentSymbolic s = do
+        state <- tryReadMVar $ internalState s
+        pure $ currentSymbolic . weatherData <$> state
+
     getCurrentIcon s = do
         state <- tryReadMVar $ internalState s
         pure $ currentIcon . weatherData <$> state
@@ -114,6 +138,14 @@ instance Store WeatherClient where
     getForecastTemperature s = do
         state <- tryReadMVar $ internalState s
         pure $ forecastTemperature . weatherData <$> state
+
+    getForecastDescription s = do
+        state <- tryReadMVar $ internalState s
+        pure $ forecastDescription . weatherData <$> state
+
+    getForecastSymbolic s = do
+        state <- tryReadMVar $ internalState s
+        pure $ forecastSymbolic . weatherData <$> state
 
     getForecastIcon s = do
         state <- tryReadMVar $ internalState s

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1f72658c3d27b9759b9bcc9688b7f10607d2c64ae02ef58db948163dba04ca91
+-- hash: 67d1cb07669c3eaf221f49902e2a489e677778110924d21973d05d8bc799b4d0
 
 name:           ntfd
 version:        0.1.0.0
@@ -52,7 +52,6 @@ library
     , microstache
     , parsec
     , text
-    , text-show
     , time
     , tomland
     , vector
@@ -78,7 +77,6 @@ executable ntfd
     , ntfd
     , parsec
     , text
-    , text-show
     , time
     , tomland
     , vector
@@ -110,7 +108,6 @@ test-suite ntfd-test
     , ntfd
     , parsec
     , text
-    , text-show
     , time
     , tomland
     , vector
