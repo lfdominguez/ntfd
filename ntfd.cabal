@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 232803b685333078611fe8eb015a548948ba778dc2c38df21848e16bbf654b19
+-- hash: 15cce8475bfc9350a64d038e3ddd6b0127d5bcf4c5d4ecc8d5d1796fecddf8a2
 
 name:           ntfd
 version:        0.1.0.0
@@ -61,6 +61,8 @@ library
 executable ntfd
   main-is: Main.hs
   other-modules:
+      Helpers
+      Modules.Weather
       Paths_ntfd
   hs-source-dirs:
       app
