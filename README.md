@@ -53,10 +53,17 @@ The [`busctl` documentation](https://www.freedesktop.org/software/systemd/man/bu
 
 ## Weather module
 <p align="center">
+    <img width="38%" src="./screenshots/weather-notification.png" />
+</p>
+<p align="center">
     <img src="./screenshots/weather-polybar.png" />
 </p>
 
-In this example, the first number is the current temperature and the second one is a 3 hour forecast. \
+The weather module sends desktop notifications when weather conditions are degrading. \
+It also exposes a D-Bus API with some convenience methods for easier desktop integration.
+
+#### Polybar integration
+In the screenshot, the first number is the current temperature and the second one is a 3 hour forecast. \
 The output is fully configurable via templating, you can also query individual values. \
 Edit the `~/.config/ntfd/config.toml` and follow the instructions. \
 For Polybar integration like in the example, update your Polybar config like so:
@@ -107,4 +114,5 @@ The binary will be available as `ntfd` from the project's root.
 
 ##### My Dunst notification icons look tiny
 Dunst has [an unreleased](https://github.com/dunst-project/dunst/pull/674) fix for this.
-In the meantime you can copy the `weather-xyz` icons from `/usr/share/icons/YourTheme/status/symbolic` somewhere else, resize them and add the new path to `icon_folders` in your `dunstrc`
+In the meantime you can copy the `weather-xyz` icons from \
+`/usr/share/icons/YourTheme/status/symbolic` somewhere else, resize them and add the new path to `icon_folders` in your `dunstrc`.
