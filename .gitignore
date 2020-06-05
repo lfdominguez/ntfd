@@ -1,2 +1,5 @@
+ntfd
 .stack-work/
 *~
+*.prof
+*.hp

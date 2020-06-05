@@ -15,17 +15,22 @@ data Unit
     | Fahrenheit
     deriving (Show)
 
--- brittany-disable-next-binding
+{- HLINT ignore "Reduce duplication" -}
 instance Eq Temperature where
     left == (Temperature rightVal rightUnit) =
-        let Temperature leftVal _ = convert left rightUnit
-        in leftVal == rightVal
+        let
+            Temperature leftVal _ = convert left rightUnit
+            leftTemp              = round leftVal :: Integer
+            rightTemp             = round rightVal :: Integer
+        in leftTemp == rightTemp
 
--- brittany-disable-next-binding
 instance Ord Temperature where
     left <= (Temperature rightVal rightUnit) =
-        let Temperature leftVal _ = convert left rightUnit
-        in leftVal <= rightVal
+        let
+            Temperature leftVal _ = convert left rightUnit
+            leftTemp              = round leftVal :: Integer
+            rightTemp             = round rightVal :: Integer
+        in leftTemp <= rightTemp
 
 -- | Convert a temperature from one unit to another
 convert :: Temperature -> Unit -> Temperature

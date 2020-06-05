@@ -1,5 +1,7 @@
 module Clients.OpenWeatherMap
     ( fetchOwm
+    , isDegradedConditions
+    , toSymbolicName
     , toWeatherIcon
     , Error(..)
     , OwmResponse(..)
@@ -20,15 +22,17 @@ import Config (WeatherConfig(..))
 
 -- OpenWeatherMap response to API calls
 data OwmResponse = OwmResponse
-    { owmTemperature :: Float
+    { owmStatus :: Int
+    , owmTemperature :: Float
+    , owmDescription :: Text
     , owmIcon :: Text
     }
     deriving (Show)
 
--- Fetch weather data from OpenWeatherMap
+-- Fetch weather data from OpenWeatherMap - Results are always in Celcius
 fetchOwm :: WeatherConfig -> QueryType -> IO (Either Error OwmResponse)
 fetchOwm cfg queryType = do
-    baseRequest <- parseRequest "GET https://api.openweathermap.org/"
+    baseRequest <- parseRequest "GET http://api.openweathermap.org/"
     let request = setRequestPath (endpoint queryType) $ setRequestQueryString params baseRequest
     res <- try $ httpLbs request
     pure $ case res of
@@ -68,6 +72,24 @@ toWeatherIcon i
     | i == "50n" = '\61514' -- Fog - night
     | otherwise = '\61453'  -- ??
 
+-- Status codes can be found here: https://openweathermap.org/weather-conditions
+-- Icon names info: https://specifications.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html
+toSymbolicName :: Int -> Text
+toSymbolicName status
+    | status >= 200 && status < 300 = "weather-storm-symbolic"
+    | status >= 300 && status < 400 = "weather-showers-scattered-symbolic"
+    | status >= 500 && status < 600 = "weather-showers-symbolic"
+    | status >= 600 && status < 700 = "weather-snow-symbolic"
+    | status >= 700 && status < 800 = "weather-fog-symbolic"
+    | otherwise                     = "weather-overcast-symbolic"
+
+-- We need to know when we're transitioning into degraded weather conditions
+isDegradedConditions :: Int -> Int -> Bool
+isDegradedConditions old new
+    | new >= 800 = False
+    | old == new = False
+    | otherwise  = True
+
 parseResponse :: ByteString -> QueryType -> Either Error OwmResponse
 parseResponse bytes queryType = do
     value <- first InvalidJson $ eitherDecode bytes
@@ -82,7 +104,9 @@ currentParser :: Value -> Parser OwmResponse
 currentParser = withObject "weather" $ \o -> do
     main           <- o .: "main"
     weather        <- weatherParser $ Object o
+    owmStatus      <- weather .: "id"
     owmTemperature <- main .: "temp"
+    owmDescription <- weather .: "description"
     owmIcon        <- weather .: "icon"
     return OwmResponse { .. }
 
@@ -96,7 +120,9 @@ forecastParser = withObject "forecast" $ \o -> do
         Nothing -> fail "no forecast received"
     main           <- root .: "main"
     weather        <- weatherParser $ Object root
+    owmStatus      <- weather .: "id"
     owmTemperature <- main .: "temp"
+    owmDescription <- weather .: "description"
     owmIcon        <- weather .: "icon"
     return OwmResponse { .. }
 

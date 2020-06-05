@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: de6c9225da735c587e53fc0d808dc4825a282aaa3e11422f70514c05c3951f75
+-- hash: 07f6952c0fc927bcdc217980f156ba1a14662f1407be2f5f35c38ea6afd5f3cc
 
 name:           ntfd
-version:        0.1.0.0
+version:        0.1.0
 description:    Please see the README on GitHub at <https://github.com/kamek-pf/ntfd#readme>
 homepage:       https://github.com/kamek-pf/ntfd#readme
 bug-reports:    https://github.com/kamek-pf/ntfd/issues
@@ -32,7 +32,6 @@ library
       Config.Env
       Config.Twitch
       Config.Weather
-      Lib
       Stores.Twitch
       Stores.Weather
       Types.Weather
@@ -40,35 +39,47 @@ library
       Paths_ntfd
   hs-source-dirs:
       src
-  default-extensions: OverloadedStrings RecordWildCards NamedFieldPuns BangPatterns
+  default-extensions: OverloadedStrings RecordWildCards NamedFieldPuns ScopedTypeVariables
   ghc-options: -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat -Widentities -Wredundant-constraints -Wmissing-export-lists -Wpartial-fields
   build-depends:
       aeson
     , async
     , base >=4.7 && <5
     , bytestring
+    , containers
+    , dbus
+    , directory
     , http-conduit
+    , microstache
+    , parsec
     , text
     , time
     , tomland
     , vector
   default-language: Haskell2010
 
-executable ntfd-exe
+executable ntfd
   main-is: Main.hs
   other-modules:
+      Helpers
+      Modules.Weather
       Paths_ntfd
   hs-source-dirs:
       app
-  default-extensions: OverloadedStrings RecordWildCards NamedFieldPuns BangPatterns
-  ghc-options: -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat -Widentities -Wredundant-constraints -Wmissing-export-lists -Wpartial-fields -threaded -rtsopts -with-rtsopts=-N
+  default-extensions: OverloadedStrings RecordWildCards NamedFieldPuns ScopedTypeVariables
+  ghc-options: -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat -Widentities -Wredundant-constraints -Wmissing-export-lists -Wpartial-fields
   build-depends:
       aeson
     , async
     , base >=4.7 && <5
     , bytestring
+    , containers
+    , dbus
+    , directory
     , http-conduit
+    , microstache
     , ntfd
+    , parsec
     , text
     , time
     , tomland
@@ -81,20 +92,26 @@ test-suite ntfd-test
   other-modules:
       Spec.Clients.OpenWeatherMap
       Spec.Config
+      Spec.Stores.Weather
       Spec.Weather
       Paths_ntfd
   hs-source-dirs:
       test
-  default-extensions: OverloadedStrings RecordWildCards NamedFieldPuns BangPatterns
+  default-extensions: OverloadedStrings RecordWildCards NamedFieldPuns ScopedTypeVariables
   ghc-options: -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat -Widentities -Wredundant-constraints -Wmissing-export-lists -Wpartial-fields -Wno-incomplete-uni-patterns -Wno-missing-export-lists -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
     , async
     , base >=4.7 && <5
     , bytestring
+    , containers
+    , dbus
+    , directory
     , hspec
     , http-conduit
+    , microstache
     , ntfd
+    , parsec
     , text
     , time
     , tomland

@@ -7,7 +7,9 @@ client_id = "3szce2tmzmjbvug7x3fkiwhe5xgk3f"
 
 # OpenWeatherMap configuration
 [openweathermap]
+# Enable / disable OpenWeatherMap integration
 enabled = true
+
 # Register at https://openweathermap.org to get your API key
 # If you don't want to write your key here, you can delete this line and use the OWM_API_KEY environment variable instead
 api_key = "YOUR_API_KEY"
@@ -15,6 +17,13 @@ api_key = "YOUR_API_KEY"
 # This is for Montreal, find your city at https://openweathermap.org
 # The id will be the last part of the URL
 city_id = "6077243"
+
+# When notifications are sent, the notification title comes from OpenWeatherMap.
+# You can customize the message body, or use "" to leave it blank
+notification_body = "Expected within the next 3 hours"
+
+# How often should we fetch weather data (in seconds)
+sync_frequency = 1800 # 30 minutes
 
 # Output format, using Handlebars syntax, meaning variables should be used like {{ this }}
 # Available tokens are:

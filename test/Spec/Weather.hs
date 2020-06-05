@@ -35,3 +35,8 @@ spec = hspec $ describe "Weather helpers" $ do
         let left  = convert (Temperature 0 Kelvin) Fahrenheit
         let right = Temperature (-459.67) Fahrenheit
         left `shouldBe` right
+
+    it "should perform equality checks on rounded values" $ do
+        let left  = Temperature 23.3 Celcius
+        let right = Temperature 23.4 Celcius
+        left `shouldBe` right

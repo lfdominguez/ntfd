@@ -1,0 +1,8 @@
+cradle:
+  stack:
+    - path: ./test
+      component: "ntfd:test:ntfd-test"
+    - path: ./src
+      component: "ntfd:lib"
+    - path: ./app
+      component: "ntfd:exe:ntfd"

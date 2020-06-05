@@ -1,6 +1,7 @@
 module Config
     ( loadConfig
     , Config(..)
+    , ConfigError(..)
     , module Config.Twitch
     , module Config.Weather
     )
@@ -25,7 +26,10 @@ loadConfig path = do
     readRes <- try $ TIO.readFile path
     pure $ builder env <$> readRes
   where
-    builder env content = Config
-        { twitchCfg  = loadTwitchConfig content
-        , weatherCfg = loadWeatherConfig env content
-        }
+    builder env content =
+        Config { twitchCfg = loadTwitchConfig content, weatherCfg = loadWeatherConfig env content }
+
+data ConfigError
+    = WeatherConfigErr WeatherCfgError
+    | TwitchConfigErr TwitchCfgError
+    deriving (Show)
