@@ -87,7 +87,7 @@ Integration with the following services is planned:
     - [x] Current weather, forecast
     - [x] Template rendering for Polybar integration
     - [x] Re-implement [`polybar-forecast`](https://github.com/kamek-pf/polybar-forecast))
-    - [ ] Alerts through notifications (?)
+    - [x] Alerts through notifications
 - [ ] Github
     - [ ] Unread notifications count
     - [ ] Live notifications (?)
