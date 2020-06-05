@@ -15,11 +15,12 @@ defaultCfg :: IO WeatherConfig
 defaultCfg = do
     apiKey <- lookupEnv "OWM_API_KEY"
     pure WeatherConfig
-        { weatherEnabled  = True
-        , weatherApiKey   = fromJust $ pack <$> apiKey
-        , weatherCityId   = "6077243"
-        , weatherSyncFreq = secondsToNominalDiffTime 1800
-        , weatherTemplate =
+        { weatherEnabled   = True
+        , weatherApiKey    = fromJust $ pack <$> apiKey
+        , weatherCityId    = "6077243"
+        , weatherNotifBody = "hullo"
+        , weatherSyncFreq  = secondsToNominalDiffTime 1800
+        , weatherTemplate  =
             "{{ temp_icon }} {{ temp_celcius }}°C {{ trend }} {{ forecast_icon }} {{ forecast_celcius }}°C"
         }
 

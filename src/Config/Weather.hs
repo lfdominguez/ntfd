@@ -26,18 +26,20 @@ loadWeatherConfig env toml = do
 -- Apply environment variable fallbacks to build the final configuration
 applyEnvFallbacks :: Env -> TomlWeatherConfig -> Either WeatherCfgError WeatherConfig
 applyEnvFallbacks env toml = case (E.weatherApiKey env, apiKey toml) of
-    (Just k, _     ) -> Right $ withKey k toml
-    (_     , Just k) -> Right $ withKey k toml
+    (Just k, _     ) -> withKey k toml
+    (_     , Just k) -> withKey k toml
     _                -> Left MissingApiKey
   where
-    withKey k toml' = WeatherConfig
-        { weatherEnabled   = enabled toml'
-        , weatherApiKey    = encodeUtf8 k
-        , weatherCityId    = encodeUtf8 $ cityId toml'
-        , weatherNotifBody = notifBody toml'
-        , weatherSyncFreq  = toDiffTime $ syncFrequency toml'
-        , weatherTemplate  = template toml'
-        }
+    withKey k toml'
+        | not (enabled toml') = Left Disabled
+        | otherwise = Right $ WeatherConfig
+            { weatherEnabled   = enabled toml'
+            , weatherApiKey    = encodeUtf8 k
+            , weatherCityId    = encodeUtf8 $ cityId toml'
+            , weatherNotifBody = notifBody toml'
+            , weatherSyncFreq  = toDiffTime $ syncFrequency toml'
+            , weatherTemplate  = template toml'
+            }
     toDiffTime = secondsToNominalDiffTime . fromInteger . toInteger
 
 -- | OpenWeatherMap configuration options required by the application
@@ -61,7 +63,8 @@ data TomlWeatherConfig = TomlWeatherConfig
     }
 
 data WeatherCfgError
-    = MissingApiKey
+    = Disabled
+    | MissingApiKey
     | ParseError DecodeException
     deriving (Show)
 
