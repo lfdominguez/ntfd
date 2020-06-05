@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 07f6952c0fc927bcdc217980f156ba1a14662f1407be2f5f35c38ea6afd5f3cc
+-- hash: 46c4607a3f9ff0a6c42347506b8dc2ae9de878e87b157d6ddbf5a8103891fe8b
 
 name:           ntfd
 version:        0.1.0
@@ -50,8 +50,10 @@ library
     , dbus
     , directory
     , http-conduit
+    , libmpd
     , microstache
     , parsec
+    , path
     , text
     , time
     , tomland
@@ -62,6 +64,7 @@ executable ntfd
   main-is: Main.hs
   other-modules:
       Helpers
+      Modules.Mpd
       Modules.Weather
       Paths_ntfd
   hs-source-dirs:
@@ -77,9 +80,11 @@ executable ntfd
     , dbus
     , directory
     , http-conduit
+    , libmpd
     , microstache
     , ntfd
     , parsec
+    , path
     , text
     , time
     , tomland
@@ -109,9 +114,11 @@ test-suite ntfd-test
     , directory
     , hspec
     , http-conduit
+    , libmpd
     , microstache
     , ntfd
     , parsec
+    , path
     , text
     , time
     , tomland

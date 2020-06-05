@@ -33,7 +33,9 @@ dependencies:
 - microstache
 - parsec
 - dbus
+- libmpd
 - directory
+- path
 
 default-extensions:
 - OverloadedStrings

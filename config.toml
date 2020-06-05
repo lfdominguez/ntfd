@@ -18,7 +18,7 @@ api_key = "YOUR_API_KEY"
 # The id will be the last part of the URL
 city_id = "6077243"
 
-# When notifications are sent, the notification title comes from OpenWeatherMap.
+# When notifications are sent, the notification title comes from OpenWeatherMap
 # You can customize the message body, or use "" to leave it blank
 notification_body = "Expected within the next 3 hours"
 
@@ -37,3 +37,16 @@ sync_frequency = 1800 # 30 minutes
 # - forecast_fahrenheit
 # - forecast_icon
 display = "{{ temp_icon }} {{ temp_celcius }}°C {{ trend }} {{ forecast_icon }} {{ forecast_celcius }}°C"
+
+# MPD configuration
+[mpd]
+# Enable / disable mpd integration
+enabled = true
+
+# Top level directory containing your MPD collection
+# Should be the same value as "music_directory" from your mpd.conf
+music_directory = "/mnt/media/music"
+
+# Cover art files should have standardized names and formats within your collection
+# Specify the file name we should look for here
+cover_name = "cover.jpg"
