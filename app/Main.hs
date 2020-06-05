@@ -10,8 +10,10 @@ import Data.Bifunctor (first)
 import Data.Either (rights)
 import Data.Text (Text)
 import Data.Time.Clock (NominalDiffTime)
+import DBus (methodCall, methodCallDestination, methodCallBody, toVariant, Variant)
 import DBus.Client
     ( autoMethod
+    , callNoReply
     , connectSession
     , defaultInterface
     , requestName
@@ -23,12 +25,22 @@ import DBus.Client
     , Client
     , RequestNameReply(..)
     )
+import Data.Int (Int32)
+import Data.Word (Word32)
 import System.Directory (getXdgDirectory, XdgDirectory(..))
 import System.Exit (exitFailure)
+import qualified Data.Text as T
+import qualified Data.Char as C
+import qualified Data.Map as M
 
 import Config (loadConfig, Config(..), ConfigError(..), WeatherConfig(..))
 import Types.Weather (convert, Temperature(..), Unit(..))
 import qualified Stores.Weather as WS
+
+data NotificationType
+    = Weather
+    | Twitch
+    deriving (Show, Eq)
 
 main :: IO ()
 main = do
@@ -64,7 +76,14 @@ weatherService dbusClient config = do
     (store :: WS.WeatherClient) <- WS.initWeatherStore config
     export dbusClient "/weather" $ interface store
     forever $ do
-        _ <- WS.syncForecast store
+        shouldNotify <- WS.syncForecast store
+        case shouldNotify of
+            Right True -> do
+                let body = weatherNotifBody config
+                title <- fromMaybe <$> WS.getForecastDescription store
+                icon  <- WS.getForecastSymbolic store
+                notify dbusClient Weather title body icon
+            _ -> pure ()
         sleep $ weatherSyncFreq config
   where
     interface s = defaultInterface
@@ -81,13 +100,49 @@ weatherService dbusClient config = do
     methods s = [currentTemp s, forecastTemp s]
     properties s = [renderedTemplate s, currentIcon s, forecastIcon s]
 
+notify :: Client -> NotificationType -> Text -> Text -> Maybe Text -> IO ()
+notify client nType title text icon = callNoReply client params
+  where
+    params = (methodCall objectPath interface methodName)
+        { methodCallDestination = Just "org.freedesktop.Notifications"
+        , methodCallBody        = args
+        }
+    objectPath = "/org/freedesktop/Notifications"
+    interface  = "org.freedesktop.Notifications"
+    methodName = "Notify"
+    appName    = "ntfd" :: Text
+    appIcon    = fromMaybe icon
+    replaceId nType'
+        | nType' == Weather = 1
+        | nType' == Twitch  = 2
+        | otherwise         = 0
+    args =
+        [ toVariant appName
+        , toVariant (replaceId nType :: Word32)
+        , toVariant appIcon
+        , toVariant $ capitalize title
+        , toVariant text
+        , toVariant ([] :: [String])
+        , toVariant (M.fromList [] :: M.Map String Variant)
+        , toVariant (10000 :: Int32)
+        ]
+
 sleep :: NominalDiffTime -> IO ()
 sleep = threadDelay . toMicroSeconds where toMicroSeconds = (1000000 *) . fromInteger . round
+
+capitalize :: Text -> Text
+capitalize text = case T.uncons text of
+    Nothing     -> text
+    Just (h, t) -> let lowered = T.toLower t in T.cons (C.toUpper h) lowered
 
 -- The following functions help mapping our data types to work around DBus' lack of null type
 fromEither :: (Monoid t) => Either e t -> t
 fromEither (Left  _) = mempty
 fromEither (Right t) = t
+
+fromMaybe :: (Monoid t) => Maybe t -> t
+fromMaybe Nothing  = mempty
+fromMaybe (Just t) = t
 
 fromIcon :: Maybe Char -> String
 fromIcon Nothing  = ""

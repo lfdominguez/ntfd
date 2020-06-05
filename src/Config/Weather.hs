@@ -31,11 +31,12 @@ applyEnvFallbacks env toml = case (E.weatherApiKey env, apiKey toml) of
     _                -> Left MissingApiKey
   where
     withKey k toml' = WeatherConfig
-        { weatherEnabled  = enabled toml'
-        , weatherApiKey   = encodeUtf8 k
-        , weatherCityId   = encodeUtf8 $ cityId toml'
-        , weatherSyncFreq = toDiffTime $ syncFrequency toml'
-        , weatherTemplate = template toml'
+        { weatherEnabled   = enabled toml'
+        , weatherApiKey    = encodeUtf8 k
+        , weatherCityId    = encodeUtf8 $ cityId toml'
+        , weatherNotifBody = notifBody toml'
+        , weatherSyncFreq  = toDiffTime $ syncFrequency toml'
+        , weatherTemplate  = template toml'
         }
     toDiffTime = secondsToNominalDiffTime . fromInteger . toInteger
 
@@ -44,6 +45,7 @@ data WeatherConfig = WeatherConfig
     { weatherEnabled :: Bool
     , weatherApiKey :: ByteString
     , weatherCityId :: ByteString
+    , weatherNotifBody :: Text
     , weatherSyncFreq :: NominalDiffTime
     , weatherTemplate :: Text
     } deriving (Show)
@@ -53,6 +55,7 @@ data TomlWeatherConfig = TomlWeatherConfig
     { enabled :: Bool
     , apiKey :: Maybe Text -- ^ Optional in the config file, can be specified via env variables
     , cityId :: Text
+    , notifBody :: Text
     , syncFrequency :: Natural
     , template :: Text
     }
@@ -68,5 +71,6 @@ weatherCodec = TomlWeatherConfig
     <$> Toml.bool "enabled" .= enabled
     <*> Toml.dioptional (Toml.text "api_key") .= apiKey
     <*> Toml.text "city_id" .= cityId
+    <*> Toml.text "notification_body" .= notifBody
     <*> Toml.natural "sync_frequency" .= syncFrequency
     <*> Toml.text "display" .= template

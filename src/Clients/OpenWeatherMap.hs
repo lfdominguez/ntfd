@@ -72,14 +72,23 @@ toWeatherIcon i
     | i == "50n" = '\61514' -- Fog - night
     | otherwise = '\61453'  -- ??
 
--- More details here: https://specifications.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html
--- brittany-disable-next-binding
+-- Status codes can be found here: https://openweathermap.org/weather-conditions
+-- Icon names info: https://specifications.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html
 toSymbolicName :: Int -> Text
-toSymbolicName status = undefined
+toSymbolicName status
+    | status >= 200 && status < 300 = "weather-storm-symbolic"
+    | status >= 300 && status < 400 = "weather-showers-scattered-symbolic"
+    | status >= 500 && status < 600 = "weather-showers-symbolic"
+    | status >= 600 && status < 700 = "weather-snow-symbolic"
+    | status >= 700 && status < 800 = "weather-fog-symbolic"
+    | otherwise                     = "weather-overcast-symbolic"
 
 -- We need to know when we're transitioning into degraded weather conditions
 isDegradedConditions :: Int -> Int -> Bool
-isDegradedConditions = undefined
+isDegradedConditions old new
+    | new >= 800 = False
+    | old == new = False
+    | otherwise  = True
 
 parseResponse :: ByteString -> QueryType -> Either Error OwmResponse
 parseResponse bytes queryType = do

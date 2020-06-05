@@ -16,6 +16,10 @@ api_key = "YOUR_API_KEY"
 # The id will be the last part of the URL
 city_id = "6077243"
 
+# When notifications are sent, the notification title comes from OpenWeatherMap.
+# You can customize the message body, or use "" to leave it blank
+notification_body = "Expected within the next 3 hours"
+
 # How often should we fetch weather data (in seconds)
 sync_frequency = 1800 # 30 minutes
 

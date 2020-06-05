@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 67d1cb07669c3eaf221f49902e2a489e677778110924d21973d05d8bc799b4d0
+-- hash: 232803b685333078611fe8eb015a548948ba778dc2c38df21848e16bbf654b19
 
 name:           ntfd
 version:        0.1.0.0
@@ -46,6 +46,7 @@ library
     , async
     , base >=4.7 && <5
     , bytestring
+    , containers
     , dbus
     , directory
     , http-conduit
@@ -70,6 +71,7 @@ executable ntfd
     , async
     , base >=4.7 && <5
     , bytestring
+    , containers
     , dbus
     , directory
     , http-conduit
@@ -100,6 +102,7 @@ test-suite ntfd-test
     , async
     , base >=4.7 && <5
     , bytestring
+    , containers
     , dbus
     , directory
     , hspec
