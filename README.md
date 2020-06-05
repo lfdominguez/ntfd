@@ -102,3 +102,9 @@ docker build -t kamek-pf/ntfd .
 docker run --rm -ti -v $(pwd):/mnt kamek-pf/ntfd /bin/sh -c 'cp ntfd /mnt'
 ```
 The binary will be available as `ntfd` from the project's root.
+
+## Troubleshooting
+
+##### My Dunst notification icons look tiny
+Dunst has [an unreleased](https://github.com/dunst-project/dunst/pull/674) fix for this.
+In the meantime you can copy the `weather-xyz` icons from `/usr/share/icons/YourTheme/status/symbolic` somewhere else, resize them and add the new path to `icon_folders` in your `dunstrc`
