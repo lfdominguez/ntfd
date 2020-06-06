@@ -77,7 +77,7 @@ exec = busctl --user -j get-property io.ntfd /weather openweathermap.strings Ren
 interval = 60
 label-font = 3
 ```
-I recomend a 60 second interval, this way the bar will stay in sync with the notifications.
+I recommend a 60 second interval, this way the bar will stay in sync with the notifications.
 Don't forget to add Weather Icons to your config or it won't render correctly:
 ```
 ...
