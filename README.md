@@ -71,7 +71,7 @@ For Polybar integration like in the example, update your Polybar config like so:
 [module/weather]
 type = custom/script
 exec = busctl --user -j get-property io.ntfd /weather openweathermap.strings RenderedTemplate | jq -r .data
-interval = 300
+interval = 60
 label-font = 3
 ```
 Don't forget to add Weather Icons to your config or it won't render correctly:
