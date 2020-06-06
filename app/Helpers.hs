@@ -38,10 +38,9 @@ notify client nType title text icon = callNoReply client params
     methodName = "Notify"
     appName    = "ntfd" :: Text
     appIcon    = fromMaybe icon
-    replaceId nType'
-        | nType' == Weather = 1
-        | nType' == Twitch  = 2
-        | otherwise         = 0
+    replaceId Weather = 1
+    replaceId Mpd     = 2
+    replaceId Twitch  = 3
     args =
         [ toVariant appName
         , toVariant (replaceId nType :: Word32)

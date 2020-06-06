@@ -39,13 +39,18 @@ mpdNotifSvc client config = do
             writeIORef ref newSongPath
             sendNotification song
     sendNotification song = do
-        let tags   = sgTags song
-        let title  = M.lookup Title tags
-        let artist = M.lookup Artist tags
+        let tags    = sgTags song
+        let sTitle  = M.lookup Title tags
+        let sArtist = M.lookup Artist tags
+        let sAlbum  = M.lookup Album tags
         cover <- getCoverPath song
-        case (title, artist) of
-            (Just [t], Just [a]) -> notify client Mpd (toText t) (toText a) cover
-            _                    -> pure ()
+        case (sTitle, sArtist, sAlbum) of
+            (Just [title], Just [artist], Just [album]) ->
+                let
+                    nHead = toText title
+                    nBody = toText artist <> " - " <> toText album
+                in notify client Mpd nHead nBody cover
+            _ -> pure ()
     getCoverPath song = do
         let musicDir     = mpdMusicDirectory config
         let coverFile    = mpdCoverName config
