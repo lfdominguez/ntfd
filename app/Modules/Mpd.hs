@@ -6,6 +6,7 @@ where
 import Control.Monad (forever, when)
 import DBus.Client (Client)
 import Data.IORef (newIORef, readIORef, writeIORef)
+import Data.Maybe (isJust)
 import Network.MPD
     (currentSong, idle, toString, toText, withMPD, Metadata(..), Song(..), Subsystem(..))
 import System.Directory (doesFileExist)
@@ -43,14 +44,21 @@ mpdNotifSvc client config = do
         let sTitle  = M.lookup Title tags
         let sArtist = M.lookup Artist tags
         let sAlbum  = M.lookup Album tags
+        let sName   = M.lookup Name tags
         cover <- getCoverPath song
-        case (sTitle, sArtist, sAlbum) of
-            (Just [title], Just [artist], Just [album]) ->
-                let
-                    nHead    = toText title
-                    nBody    = toText artist <> " - " <> toText album
-                    nTimeout = (notificationTimeout . mpdGlobalCfg) config
-                in notify client Mpd nHead nBody cover nTimeout
+        case (sTitle, sArtist, sAlbum, sName) of
+            -- Local tracks
+            (Just [title], Just [artist], Just [album], _) -> do
+                let nHead    = toText title
+                let nBody    = toText artist <> " - " <> toText album
+                let nTimeout = (notificationTimeout . mpdGlobalCfg) config
+                when (shouldNotify cover) $ notify client Mpd nHead nBody cover nTimeout
+            -- Streaming content
+            (Just [title], _, _, Just [name]) -> do
+                let nHead    = toText title
+                let nBody    = toText name
+                let nTimeout = (notificationTimeout . mpdGlobalCfg) config
+                when (shouldNotify cover) $ notify client Mpd nHead nBody cover nTimeout
             _ -> pure ()
     getCoverPath song = do
         musicDir <- expandPath $ mpdMusicDirectory config
@@ -58,6 +66,9 @@ mpdNotifSvc client config = do
         let (songDir, _) = splitFileName $ (toString . sgFilePath) song
         let coverPath    = joinPath [musicDir, songDir, coverFile]
         hasCover <- doesFileExist coverPath
-        let shouldSkip   = mpdSkipMissingCover config
-        let shouldNotify = hasCover || (not hasCover && not shouldSkip)
-        pure $ if shouldNotify then Just (T.pack coverPath) else Nothing
+        pure $ if hasCover then Just (T.pack coverPath) else Nothing
+    shouldNotify coverPath =
+        let
+            hasCover   = isJust coverPath
+            shouldSkip = mpdSkipMissingCover config
+        in hasCover || (not hasCover && not shouldSkip)
