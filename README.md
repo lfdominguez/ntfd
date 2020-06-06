@@ -2,7 +2,7 @@
 ![GitHub](https://img.shields.io/github/license/kamek-pf/ntfd)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/kamek-pf/ntfd)](https://github.com/kamek-pf/ntfd)
 
-A work in progress notification daemon.
+A notification daemon for fancy desktop integrations.
 
 `ntfd` synchronizes with different services and offers synchronous APIs for desktop integration via D-Bus. \
 It can be used as a data source for [Polybar](https://github.com/polybar/polybar), [Rofi](https://github.com/davatorium/rofi) or any other similar tool.
@@ -87,7 +87,7 @@ font-2 = Weather Icons:size=12;0
 
 ## MPD module
 <p align="center">
-    <img width="38%" src="./screenshots/mpd-notification.png" />
+    <img width="30%" src="./screenshots/mpd-notification.png" />
 </p>
 
 The MPD module sends desktop notifications when songs start playing. \
