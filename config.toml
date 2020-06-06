@@ -50,7 +50,7 @@ music_directory = "/mnt/media/music"
 cover_name = "cover.jpg"
 
 # When this is enabled, songs with missing cover image will not trigger a notification
-skip_missing_cover = false
+skip_missing_cover = true
 
 # Twitch configuration
 [twitch]
