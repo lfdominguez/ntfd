@@ -1,5 +1,6 @@
 module Helpers
-    ( notify
+    ( expandPath
+    , notify
     , sleep
     , capitalize
     , fromEither
@@ -15,6 +16,8 @@ import DBus (methodCall, methodCallDestination, methodCallBody, toVariant, Varia
 import DBus.Client (callNoReply, Client)
 import Data.Int (Int32)
 import Data.Word (Word32)
+import System.Directory (getHomeDirectory)
+import System.FilePath (joinPath)
 import qualified Data.Text as T
 import qualified Data.Char as C
 import qualified Data.Map as M
@@ -51,6 +54,12 @@ notify client nType title text icon = callNoReply client params
         , toVariant (M.fromList [] :: M.Map String Variant)
         , toVariant (10000 :: Int32)
         ]
+
+expandPath :: FilePath -> IO FilePath
+expandPath ('~' : '/' : p) = do
+    home <- getHomeDirectory
+    pure $ joinPath [home, p]
+expandPath p = pure p
 
 -- | Wait for a given amount of time
 sleep :: NominalDiffTime -> IO ()

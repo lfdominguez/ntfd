@@ -13,7 +13,7 @@ import System.FilePath (joinPath, splitFileName)
 import qualified Data.Map as M
 import qualified Data.Text as T
 
-import Helpers (notify, NotificationType(..))
+import Helpers (expandPath, notify, NotificationType(..))
 import Config (MpdConfig(..))
 
 -- MPD notification service, watches player state changes and sends
@@ -52,7 +52,7 @@ mpdNotifSvc client config = do
                 in notify client Mpd nHead nBody cover
             _ -> pure ()
     getCoverPath song = do
-        let musicDir     = mpdMusicDirectory config
+        musicDir <- expandPath $ mpdMusicDirectory config
         let coverFile    = mpdCoverName config
         let (songDir, _) = splitFileName $ (toString . sgFilePath) song
         let coverPath    = joinPath [musicDir, songDir, coverFile]
