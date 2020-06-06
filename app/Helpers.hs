@@ -21,6 +21,7 @@ import qualified Data.Map as M
 
 data NotificationType
     = Weather
+    | Mpd
     | Twitch
     deriving (Show, Eq)
 
@@ -45,7 +46,7 @@ notify client nType title text icon = callNoReply client params
         [ toVariant appName
         , toVariant (replaceId nType :: Word32)
         , toVariant appIcon
-        , toVariant $ capitalize title
+        , toVariant title
         , toVariant text
         , toVariant ([] :: [String])
         , toVariant (M.fromList [] :: M.Map String Variant)

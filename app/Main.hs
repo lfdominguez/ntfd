@@ -13,6 +13,7 @@ import System.Exit (exitFailure)
 
 import Config (loadConfig, Config(..), ConfigError(..))
 import Modules.Weather (weatherStringsSvc)
+import Modules.Mpd (mpdNotifSvc)
 
 main :: IO ()
 main = do
@@ -34,8 +35,13 @@ main = do
 
     -- Prepare services
     let weatherSvc = first WeatherConfigErr $ weatherStringsSvc client <$> weatherCfg config
+    let mpdSvc = first MpdConfigErr $ mpdNotifSvc client <$> mpdCfg config
+    let allServices = [weatherSvc, mpdSvc]
+
+    -- Log which services failed to initialize / are disabled
+    -- print $ lefts allServices
 
     -- Spawn threads and wait forever, or until one of them fails
-    services <- mapM async $ rights [weatherSvc]
+    services <- mapM async $ rights allServices
     _        <- waitAny services
     exitFailure

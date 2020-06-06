@@ -18,7 +18,7 @@ import DBus.Client
 
 import Config (WeatherConfig(..))
 import Types.Weather (convert, Temperature(..), Unit(..))
-import Helpers (notify, sleep, fromEither, fromMaybe, NotificationType(..))
+import Helpers (capitalize, notify, sleep, fromEither, fromMaybe, NotificationType(..))
 import qualified Stores.Weather as WS
 
 -- "all strings" version of the weather DBus API, this is meant to be convenient to use
@@ -33,7 +33,7 @@ weatherStringsSvc dbusClient config = do
         case shouldNotify of
             Right True -> do
                 let body = weatherNotifBody config
-                title <- fromMaybe <$> WS.getForecastDescription store
+                title <- capitalize . fromMaybe <$> WS.getForecastDescription store
                 icon  <- WS.getForecastSymbolic store
                 notify dbusClient Weather title body icon
             _ -> pure ()
