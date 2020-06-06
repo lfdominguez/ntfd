@@ -1,4 +1,7 @@
 # `ntfd` - Notification daemon
+![GitHub](https://img.shields.io/github/license/kamek-pf/ntfd)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/kamek-pf/ntfd)](https://github.com/kamek-pf/ntfd)
+
 A work in progress notification daemon.
 
 `ntfd` synchronizes with different services and offers synchronous APIs for desktop integration via D-Bus. \
@@ -74,12 +77,21 @@ exec = busctl --user -j get-property io.ntfd /weather openweathermap.strings Ren
 interval = 60
 label-font = 3
 ```
+I recomend a 60 second interval, this way the bar will stay in sync with the notifications.
 Don't forget to add Weather Icons to your config or it won't render correctly:
 ```
 ...
 font-2 = Weather Icons:size=12;0
 ...
 ```
+
+## MPD module
+<p align="center">
+    <img width="38%" src="./screenshots/weather-notification.png" />
+</p>
+
+The MPD module sends desktop notifications when songs start playing. \
+See `config.toml` for configuration options.
 
 ## Roadmap
 Integration with the following services is planned:
@@ -88,6 +100,8 @@ Integration with the following services is planned:
     - [x] Template rendering for Polybar integration
     - [x] Re-implement [`polybar-forecast`](https://github.com/kamek-pf/polybar-forecast))
     - [x] Alerts through notifications
+- [x] MPD
+    - [x] Desktop notifications
 - [ ] Github
     - [ ] Unread notifications count
     - [ ] Live notifications (?)

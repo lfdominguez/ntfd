@@ -4,6 +4,7 @@ module Modules.Weather
 where
 
 import Control.Monad (forever)
+import Data.Time.Clock (secondsToNominalDiffTime)
 import Data.Text (Text)
 import DBus.Client
     ( autoMethod
@@ -36,9 +37,10 @@ weatherStringsSvc dbusClient config = do
                 let timeout = (notificationTimeout . weatherGlobalCfg) config
                 title <- capitalize . fromMaybe <$> WS.getForecastDescription store
                 icon  <- WS.getForecastSymbolic store
+                sleep delay
                 notify dbusClient Weather title body icon timeout
             _ -> pure ()
-        sleep $ weatherSyncFreq config
+        sleep $ weatherSyncFreq config - delay
   where
     interface s = defaultInterface
         { interfaceName       = "openweathermap.strings"
@@ -53,6 +55,7 @@ weatherStringsSvc dbusClient config = do
     forecastTemp s = autoMethod "ForecastTemperature" $ forecastTemperature s
     methods s = [currentTemp s, forecastTemp s]
     properties s = [renderedTemplate s, currentIcon s, forecastIcon s]
+    delay = secondsToNominalDiffTime 65 -- Keep notifications in sync with template
 
 fromIcon :: Maybe Char -> String
 fromIcon Nothing  = ""

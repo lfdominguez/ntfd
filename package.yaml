@@ -1,7 +1,7 @@
 name:                ntfd
 version:             0.1.0
 github:              "kamek-pf/ntfd"
-license:             BSD3
+license:             GPLv3
 author:              "Bertrand Bousquet"
 maintainer:          "b.kamek@gmail.com"
 copyright:           "2020 Bertrand Bousquet"

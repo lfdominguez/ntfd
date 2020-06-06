@@ -44,7 +44,12 @@ applyEnvFallbacks env toml global = case (E.weatherApiKey env, apiKey toml) of
             , weatherSyncFreq  = toDiffTime $ syncFrequency toml'
             , weatherTemplate  = template toml'
             }
-    toDiffTime = secondsToNominalDiffTime . fromInteger . toInteger
+    toDiffTime val =
+        let
+            asInteger  = toInteger val
+            normalized = if asInteger < 600 then 600 else asInteger
+        in secondsToNominalDiffTime $ fromInteger normalized
+
 
 -- | OpenWeatherMap configuration options required by the application
 data WeatherConfig = WeatherConfig

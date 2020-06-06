@@ -21,6 +21,7 @@ city_id = "6077243"
 notification_body = "Expected within the next 3 hours"
 
 # How often should we fetch weather data (in seconds)
+# Will default to 10 min for values under 10 min (600 seconds)
 sync_frequency = 1800 # 30 minutes
 
 # Output format, using Handlebars syntax, meaning variables should be used like {{ this }}

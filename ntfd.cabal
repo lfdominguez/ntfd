@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a3634ba7ee791fce93a0e5adb77de86906a39cd74d674ba5ca299b77d3175a98
+-- hash: a0438d507902947fd828245a33d06b9de062abc6a6743c0551a10b68f46bcace
 
 name:           ntfd
 version:        0.1.0
@@ -14,7 +14,7 @@ bug-reports:    https://github.com/kamek-pf/ntfd/issues
 author:         Bertrand Bousquet
 maintainer:     b.kamek@gmail.com
 copyright:      2020 Bertrand Bousquet
-license:        BSD3
+license:        GPLv3
 license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
