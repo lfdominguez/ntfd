@@ -2,7 +2,7 @@ module Spec.Config where
 
 import Test.Hspec
 
-import Config (loadConfig, Config(..), TwitchConfig(..), WeatherConfig(..))
+import Config (loadConfig, Config(..), MpdConfig(..), TwitchConfig(..), WeatherConfig(..))
 
 spec :: IO ()
 spec = hspec $ describe "Configuration" $ it "should read example config file" $ do
@@ -18,4 +18,10 @@ spec = hspec $ describe "Configuration" $ it "should read example config file" $
     let cityId              = weatherCityId weatherConfig
     weatherOn `shouldBe` True
     cityId `shouldBe` "6077243"
+
+    let Right mpdConfig = mpdCfg config
+    let mpdOn           = mpdEnabled mpdConfig
+    let mpdCover        = mpdCoverName mpdConfig
+    mpdOn `shouldBe` True
+    mpdCover `shouldBe` "cover.jpg"
 

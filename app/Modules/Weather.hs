@@ -4,6 +4,7 @@ module Modules.Weather
 where
 
 import Control.Monad (forever)
+import Data.Time.Clock (secondsToNominalDiffTime)
 import Data.Text (Text)
 import DBus.Client
     ( autoMethod
@@ -16,9 +17,9 @@ import DBus.Client
     , Client
     )
 
-import Config (WeatherConfig(..))
+import Config (GlobalConfig(..), WeatherConfig(..))
 import Types.Weather (convert, Temperature(..), Unit(..))
-import Helpers (notify, sleep, fromEither, fromMaybe, NotificationType(..))
+import Helpers (capitalize, notify, sleep, fromEither, fromMaybe, NotificationType(..))
 import qualified Stores.Weather as WS
 
 -- "all strings" version of the weather DBus API, this is meant to be convenient to use
@@ -32,12 +33,14 @@ weatherStringsSvc dbusClient config = do
         shouldNotify <- WS.syncForecast store
         case shouldNotify of
             Right True -> do
-                let body = weatherNotifBody config
-                title <- fromMaybe <$> WS.getForecastDescription store
+                let body    = weatherNotifBody config
+                let timeout = (notificationTimeout . weatherGlobalCfg) config
+                title <- capitalize . fromMaybe <$> WS.getForecastDescription store
                 icon  <- WS.getForecastSymbolic store
-                notify dbusClient Weather title body icon
+                sleep delay
+                notify dbusClient Weather title body icon timeout
             _ -> pure ()
-        sleep $ weatherSyncFreq config
+        sleep $ weatherSyncFreq config - delay
   where
     interface s = defaultInterface
         { interfaceName       = "openweathermap.strings"
@@ -52,6 +55,7 @@ weatherStringsSvc dbusClient config = do
     forecastTemp s = autoMethod "ForecastTemperature" $ forecastTemperature s
     methods s = [currentTemp s, forecastTemp s]
     properties s = [renderedTemplate s, currentIcon s, forecastIcon s]
+    delay = secondsToNominalDiffTime 65 -- Keep notifications in sync with template
 
 fromIcon :: Maybe Char -> String
 fromIcon Nothing  = ""

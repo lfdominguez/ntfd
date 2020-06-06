@@ -1,5 +1,8 @@
 # `ntfd` - Notification daemon
-A work in progress notification daemon.
+![GitHub](https://img.shields.io/github/license/kamek-pf/ntfd)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/kamek-pf/ntfd)](https://github.com/kamek-pf/ntfd)
+
+A lightweight notification daemon for fancy desktop integrations.
 
 `ntfd` synchronizes with different services and offers synchronous APIs for desktop integration via D-Bus. \
 It can be used as a data source for [Polybar](https://github.com/polybar/polybar), [Rofi](https://github.com/davatorium/rofi) or any other similar tool.
@@ -9,7 +12,7 @@ Arch users can install `ntfd` from the AUR. \
 Instructions to build from source can be found at the bottom of the README.
 
 ## Configuration
-If you installed from the AUR, just edit `~/.config/ntfd/config.toml` as you need. \
+If you installed from the AUR, just edit `~/.config/ntfd/config.toml` as you need and enable the modules you're interested in. \
 Keep scrolling for module specific instructions.
 
 If you're building from source, copy `config.toml` into your config directory, then edit it to enable what you need:
@@ -71,15 +74,24 @@ For Polybar integration like in the example, update your Polybar config like so:
 [module/weather]
 type = custom/script
 exec = busctl --user -j get-property io.ntfd /weather openweathermap.strings RenderedTemplate | jq -r .data
-interval = 300
+interval = 60
 label-font = 3
 ```
+I recommend a 60 second interval, this way the bar will stay in sync with the notifications.
 Don't forget to add Weather Icons to your config or it won't render correctly:
 ```
 ...
 font-2 = Weather Icons:size=12;0
 ...
 ```
+
+## MPD module
+<p align="center">
+    <img width="30%" src="./screenshots/mpd-notification.png" />
+</p>
+
+The MPD module sends desktop notifications when songs start playing. \
+See `config.toml` for configuration options.
 
 ## Roadmap
 Integration with the following services is planned:
@@ -88,6 +100,8 @@ Integration with the following services is planned:
     - [x] Template rendering for Polybar integration
     - [x] Re-implement [`polybar-forecast`](https://github.com/kamek-pf/polybar-forecast))
     - [x] Alerts through notifications
+- [x] MPD
+    - [x] Desktop notifications
 - [ ] Github
     - [ ] Unread notifications count
     - [ ] Live notifications (?)

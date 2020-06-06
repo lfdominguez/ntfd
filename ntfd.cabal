@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 07f6952c0fc927bcdc217980f156ba1a14662f1407be2f5f35c38ea6afd5f3cc
+-- hash: a0438d507902947fd828245a33d06b9de062abc6a6743c0551a10b68f46bcace
 
 name:           ntfd
 version:        0.1.0
@@ -14,7 +14,7 @@ bug-reports:    https://github.com/kamek-pf/ntfd/issues
 author:         Bertrand Bousquet
 maintainer:     b.kamek@gmail.com
 copyright:      2020 Bertrand Bousquet
-license:        BSD3
+license:        GPLv3
 license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
@@ -30,6 +30,8 @@ library
       Clients.OpenWeatherMap
       Config
       Config.Env
+      Config.Global
+      Config.Mpd
       Config.Twitch
       Config.Weather
       Stores.Twitch
@@ -49,7 +51,9 @@ library
     , containers
     , dbus
     , directory
+    , filepath
     , http-conduit
+    , libmpd
     , microstache
     , parsec
     , text
@@ -62,6 +66,7 @@ executable ntfd
   main-is: Main.hs
   other-modules:
       Helpers
+      Modules.Mpd
       Modules.Weather
       Paths_ntfd
   hs-source-dirs:
@@ -76,7 +81,9 @@ executable ntfd
     , containers
     , dbus
     , directory
+    , filepath
     , http-conduit
+    , libmpd
     , microstache
     , ntfd
     , parsec
@@ -107,8 +114,10 @@ test-suite ntfd-test
     , containers
     , dbus
     , directory
+    , filepath
     , hspec
     , http-conduit
+    , libmpd
     , microstache
     , ntfd
     , parsec

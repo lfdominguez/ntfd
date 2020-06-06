@@ -1,5 +1,6 @@
 module Helpers
-    ( notify
+    ( expandPath
+    , notify
     , sleep
     , capitalize
     , fromEither
@@ -15,18 +16,21 @@ import DBus (methodCall, methodCallDestination, methodCallBody, toVariant, Varia
 import DBus.Client (callNoReply, Client)
 import Data.Int (Int32)
 import Data.Word (Word32)
+import System.Directory (getHomeDirectory)
+import System.FilePath (joinPath)
 import qualified Data.Text as T
 import qualified Data.Char as C
 import qualified Data.Map as M
 
 data NotificationType
     = Weather
+    | Mpd
     | Twitch
     deriving (Show, Eq)
 
 -- | Send a desktop notification via DBus
-notify :: Client -> NotificationType -> Text -> Text -> Maybe Text -> IO ()
-notify client nType title text icon = callNoReply client params
+notify :: Client -> NotificationType -> Text -> Text -> Maybe Text -> NominalDiffTime -> IO ()
+notify client nType title text icon timeout = callNoReply client params
   where
     params = (methodCall objectPath interface methodName)
         { methodCallDestination = Just "org.freedesktop.Notifications"
@@ -37,20 +41,26 @@ notify client nType title text icon = callNoReply client params
     methodName = "Notify"
     appName    = "ntfd" :: Text
     appIcon    = fromMaybe icon
-    replaceId nType'
-        | nType' == Weather = 1
-        | nType' == Twitch  = 2
-        | otherwise         = 0
+    replaceId Weather = 1
+    replaceId Mpd     = 2
+    replaceId Twitch  = 3
     args =
         [ toVariant appName
         , toVariant (replaceId nType :: Word32)
         , toVariant appIcon
-        , toVariant $ capitalize title
+        , toVariant title
         , toVariant text
         , toVariant ([] :: [String])
         , toVariant (M.fromList [] :: M.Map String Variant)
-        , toVariant (10000 :: Int32)
+        , toVariant (toSeconds timeout :: Int32)
         ]
+    toSeconds = (1000 *) . fromInteger . round
+
+expandPath :: FilePath -> IO FilePath
+expandPath ('~' : '/' : p) = do
+    home <- getHomeDirectory
+    pure $ joinPath [home, p]
+expandPath p = pure p
 
 -- | Wait for a given amount of time
 sleep :: NominalDiffTime -> IO ()

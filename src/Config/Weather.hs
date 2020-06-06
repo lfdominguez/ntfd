@@ -15,36 +15,46 @@ import Toml ((.=), decode, TomlCodec, DecodeException)
 import qualified Toml
 
 import Config.Env (Env)
+import Config.Global (GlobalConfig)
 import qualified Config.Env as E
 
+type Result = Either WeatherCfgError
+
 -- | Load weather configuration from raw TOML content
-loadWeatherConfig :: Env -> Text -> Either WeatherCfgError WeatherConfig
-loadWeatherConfig env toml = do
+loadWeatherConfig :: Env -> Text -> GlobalConfig -> Result WeatherConfig
+loadWeatherConfig env toml global = do
     parsed <- first ParseError $ decode (Toml.table weatherCodec "openweathermap") toml
-    applyEnvFallbacks env parsed
+    applyEnvFallbacks env parsed global
 
 -- Apply environment variable fallbacks to build the final configuration
-applyEnvFallbacks :: Env -> TomlWeatherConfig -> Either WeatherCfgError WeatherConfig
-applyEnvFallbacks env toml = case (E.weatherApiKey env, apiKey toml) of
-    (Just k, _     ) -> withKey k toml
-    (_     , Just k) -> withKey k toml
+applyEnvFallbacks :: Env -> TomlWeatherConfig -> GlobalConfig -> Result WeatherConfig
+applyEnvFallbacks env toml global = case (E.weatherApiKey env, apiKey toml) of
+    (Just k, _     ) -> withKey k toml global
+    (_     , Just k) -> withKey k toml global
     _                -> Left MissingApiKey
   where
-    withKey k toml'
+    withKey k toml' global'
         | not (enabled toml') = Left Disabled
         | otherwise = Right $ WeatherConfig
-            { weatherEnabled   = enabled toml'
+            { weatherGlobalCfg = global'
+            , weatherEnabled   = enabled toml'
             , weatherApiKey    = encodeUtf8 k
             , weatherCityId    = encodeUtf8 $ cityId toml'
             , weatherNotifBody = notifBody toml'
             , weatherSyncFreq  = toDiffTime $ syncFrequency toml'
             , weatherTemplate  = template toml'
             }
-    toDiffTime = secondsToNominalDiffTime . fromInteger . toInteger
+    toDiffTime val =
+        let
+            asInteger  = toInteger val
+            normalized = if asInteger < 600 then 600 else asInteger
+        in secondsToNominalDiffTime $ fromInteger normalized
+
 
 -- | OpenWeatherMap configuration options required by the application
 data WeatherConfig = WeatherConfig
-    { weatherEnabled :: Bool
+    { weatherGlobalCfg :: GlobalConfig
+    , weatherEnabled :: Bool
     , weatherApiKey :: ByteString
     , weatherCityId :: ByteString
     , weatherNotifBody :: Text
