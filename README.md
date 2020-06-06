@@ -87,7 +87,7 @@ font-2 = Weather Icons:size=12;0
 
 ## MPD module
 <p align="center">
-    <img width="38%" src="./screenshots/weather-notification.png" />
+    <img width="38%" src="./screenshots/mpd-notification.png" />
 </p>
 
 The MPD module sends desktop notifications when songs start playing. \
