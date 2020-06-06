@@ -36,19 +36,19 @@ applyEnvFallbacks env toml global = case (E.weatherApiKey env, apiKey toml) of
     withKey k toml' global'
         | not (enabled toml') = Left Disabled
         | otherwise = Right $ WeatherConfig
-            { weatherGlobalConfig = global'
-            , weatherEnabled      = enabled toml'
-            , weatherApiKey       = encodeUtf8 k
-            , weatherCityId       = encodeUtf8 $ cityId toml'
-            , weatherNotifBody    = notifBody toml'
-            , weatherSyncFreq     = toDiffTime $ syncFrequency toml'
-            , weatherTemplate     = template toml'
+            { weatherGlobalCfg = global'
+            , weatherEnabled   = enabled toml'
+            , weatherApiKey    = encodeUtf8 k
+            , weatherCityId    = encodeUtf8 $ cityId toml'
+            , weatherNotifBody = notifBody toml'
+            , weatherSyncFreq  = toDiffTime $ syncFrequency toml'
+            , weatherTemplate  = template toml'
             }
     toDiffTime = secondsToNominalDiffTime . fromInteger . toInteger
 
 -- | OpenWeatherMap configuration options required by the application
 data WeatherConfig = WeatherConfig
-    { weatherGlobalConfig :: GlobalConfig
+    { weatherGlobalCfg :: GlobalConfig
     , weatherEnabled :: Bool
     , weatherApiKey :: ByteString
     , weatherCityId :: ByteString

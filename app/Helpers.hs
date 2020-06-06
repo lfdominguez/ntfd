@@ -29,8 +29,8 @@ data NotificationType
     deriving (Show, Eq)
 
 -- | Send a desktop notification via DBus
-notify :: Client -> NotificationType -> Text -> Text -> Maybe Text -> IO ()
-notify client nType title text icon = callNoReply client params
+notify :: Client -> NotificationType -> Text -> Text -> Maybe Text -> NominalDiffTime -> IO ()
+notify client nType title text icon timeout = callNoReply client params
   where
     params = (methodCall objectPath interface methodName)
         { methodCallDestination = Just "org.freedesktop.Notifications"
@@ -52,8 +52,9 @@ notify client nType title text icon = callNoReply client params
         , toVariant text
         , toVariant ([] :: [String])
         , toVariant (M.fromList [] :: M.Map String Variant)
-        , toVariant (10000 :: Int32)
+        , toVariant (toSeconds timeout :: Int32)
         ]
+    toSeconds = (1000 *) . fromInteger . round
 
 expandPath :: FilePath -> IO FilePath
 expandPath ('~' : '/' : p) = do

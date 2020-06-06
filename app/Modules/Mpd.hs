@@ -14,7 +14,7 @@ import qualified Data.Map as M
 import qualified Data.Text as T
 
 import Helpers (expandPath, notify, NotificationType(..))
-import Config (MpdConfig(..))
+import Config (GlobalConfig(..), MpdConfig(..))
 
 -- MPD notification service, watches player state changes and sends
 -- notifications on track change
@@ -47,9 +47,10 @@ mpdNotifSvc client config = do
         case (sTitle, sArtist, sAlbum) of
             (Just [title], Just [artist], Just [album]) ->
                 let
-                    nHead = toText title
-                    nBody = toText artist <> " - " <> toText album
-                in notify client Mpd nHead nBody cover
+                    nHead    = toText title
+                    nBody    = toText artist <> " - " <> toText album
+                    nTimeout = (notificationTimeout . mpdGlobalCfg) config
+                in notify client Mpd nHead nBody cover nTimeout
             _ -> pure ()
     getCoverPath song = do
         musicDir <- expandPath $ mpdMusicDirectory config
@@ -57,4 +58,6 @@ mpdNotifSvc client config = do
         let (songDir, _) = splitFileName $ (toString . sgFilePath) song
         let coverPath    = joinPath [musicDir, songDir, coverFile]
         hasCover <- doesFileExist coverPath
-        pure $ if hasCover then Just (T.pack coverPath) else Nothing
+        let shouldSkip   = mpdSkipMissingCover config
+        let shouldNotify = hasCover || (not hasCover && not shouldSkip)
+        pure $ if shouldNotify then Just (T.pack coverPath) else Nothing

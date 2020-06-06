@@ -16,7 +16,7 @@ import DBus.Client
     , Client
     )
 
-import Config (WeatherConfig(..))
+import Config (GlobalConfig(..), WeatherConfig(..))
 import Types.Weather (convert, Temperature(..), Unit(..))
 import Helpers (capitalize, notify, sleep, fromEither, fromMaybe, NotificationType(..))
 import qualified Stores.Weather as WS
@@ -32,10 +32,11 @@ weatherStringsSvc dbusClient config = do
         shouldNotify <- WS.syncForecast store
         case shouldNotify of
             Right True -> do
-                let body = weatherNotifBody config
+                let body    = weatherNotifBody config
+                let timeout = (notificationTimeout . weatherGlobalCfg) config
                 title <- capitalize . fromMaybe <$> WS.getForecastDescription store
                 icon  <- WS.getForecastSymbolic store
-                notify dbusClient Weather title body icon
+                notify dbusClient Weather title body icon timeout
             _ -> pure ()
         sleep $ weatherSyncFreq config
   where

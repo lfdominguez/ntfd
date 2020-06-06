@@ -23,7 +23,7 @@ loadMpdConfig toml global = do
         | not (enabled toml') = Left Disabled
         | not (isValid (musicDirectory toml')) = Left InvalidPath
         | otherwise = Right $ MpdConfig
-            { mpdGlobalConf       = global
+            { mpdGlobalCfg        = global
             , mpdEnabled          = enabled toml'
             , mpdMusicDirectory   = musicDirectory toml'
             , mpdCoverName        = coverName toml'
@@ -32,7 +32,7 @@ loadMpdConfig toml global = do
 
 -- | MPD configuration options required by the application
 data MpdConfig = MpdConfig
-    { mpdGlobalConf :: GlobalConfig
+    { mpdGlobalCfg :: GlobalConfig
     , mpdEnabled :: Bool
     , mpdMusicDirectory :: FilePath
     , mpdCoverName :: String

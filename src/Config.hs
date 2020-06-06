@@ -10,7 +10,6 @@ module Config
 where
 
 import Control.Exception (try, IOException)
-import Control.Monad
 import Data.Bifunctor (first)
 import qualified Data.Text.IO as TIO
 
