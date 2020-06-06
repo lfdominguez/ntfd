@@ -9,7 +9,7 @@ Arch users can install `ntfd` from the AUR. \
 Instructions to build from source can be found at the bottom of the README.
 
 ## Configuration
-If you installed from the AUR, just edit `~/.config/ntfd/config.toml` as you need. \
+If you installed from the AUR, just edit `~/.config/ntfd/config.toml` as you need and enable the modules you're interested in. \
 Keep scrolling for module specific instructions.
 
 If you're building from source, copy `config.toml` into your config directory, then edit it to enable what you need:

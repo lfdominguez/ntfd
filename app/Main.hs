@@ -34,8 +34,8 @@ main = do
         exitFailure
 
     -- Prepare services
-    let weatherSvc = first WeatherConfigErr $ weatherStringsSvc client <$> weatherCfg config
-    let mpdSvc = first MpdConfigErr $ mpdNotifSvc client <$> mpdCfg config
+    let weatherSvc = first WeatherCfgError $ weatherStringsSvc client <$> weatherCfg config
+    let mpdSvc = first MpdCfgError $ mpdNotifSvc client <$> mpdCfg config
     let allServices = [weatherSvc, mpdSvc]
 
     -- Log which services failed to initialize / are disabled
