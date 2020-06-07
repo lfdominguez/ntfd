@@ -8,7 +8,7 @@ A lightweight notification daemon for fancy desktop integrations.
 It can be used as a data source for [Polybar](https://github.com/polybar/polybar), [Rofi](https://github.com/davatorium/rofi) or any other similar tool.
 
 ## Installation
-Arch users can install `ntfd` from the AUR. \
+Arch users can install [`ntfd-bin`](https://aur.archlinux.org/packages/ntfd-bin/) from the AUR. \
 Instructions to build from source can be found at the bottom of the README.
 
 ## Configuration
