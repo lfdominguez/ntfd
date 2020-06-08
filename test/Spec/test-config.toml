@@ -6,10 +6,10 @@ notification_timeout = 10
 # OpenWeatherMap configuration
 [openweathermap]
 # Enable / disable OpenWeatherMap integration
-enabled = false
+enabled = true
 
 # Register at https://openweathermap.org to get your API key
-# If you don't want to write your key here, use one of the alternate forms.
+# If you don't want to write your key here, use one of the alternate form.
 # To read from a file or an environment variable:
 # api_key = "file:~/your_file/some-key.txt"
 # api_key = "env:OWM_API_KEY"
@@ -43,7 +43,7 @@ display = "{{ temp_icon }} {{ temp_celcius }}°C {{ trend }} {{ forecast_icon }}
 # MPD configuration
 [mpd]
 # Enable / disable mpd integration
-enabled = false
+enabled = true
 
 # Top level directory containing your MPD collection
 # Should be the same value as "music_directory" from your mpd.conf
@@ -59,6 +59,6 @@ skip_missing_cover = true
 # Twitch configuration
 [twitch]
 # Enable / disable Twitch integration
-enabled = false
+enabled = true
 # Twitch client id for ntfd, you probably don't want to change that
 client_id = "3szce2tmzmjbvug7x3fkiwhe5xgk3f"

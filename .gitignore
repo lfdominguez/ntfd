@@ -1,4 +1,4 @@
-ntfd-*
+/ntfd-*
 .stack-work/
 *~
 *.prof

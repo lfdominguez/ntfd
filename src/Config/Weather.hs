@@ -1,7 +1,7 @@
 module Config.Weather
     ( loadWeatherConfig
     , WeatherConfig(..)
-    , WeatherCfgError
+    , WeatherCfgError(..)
     )
 where
 
@@ -14,42 +14,38 @@ import Numeric.Natural (Natural)
 import Toml ((.=), decode, TomlCodec, DecodeException)
 import qualified Toml
 
-import Config.Env (Env)
+import Config.Env (loadSecret)
 import Config.Global (GlobalConfig)
-import qualified Config.Env as E
-
-type Result = Either WeatherCfgError
 
 -- | Load weather configuration from raw TOML content
-loadWeatherConfig :: Env -> Text -> GlobalConfig -> Result WeatherConfig
-loadWeatherConfig env toml global = do
-    parsed <- first ParseError $ decode (Toml.table weatherCodec "openweathermap") toml
-    applyEnvFallbacks env parsed global
-
--- Apply environment variable fallbacks to build the final configuration
-applyEnvFallbacks :: Env -> TomlWeatherConfig -> GlobalConfig -> Result WeatherConfig
-applyEnvFallbacks env toml global = case (E.weatherApiKey env, apiKey toml) of
-    (Just k, _     ) -> withKey k toml global
-    (_     , Just k) -> withKey k toml global
-    _                -> Left MissingApiKey
+loadWeatherConfig :: Text -> GlobalConfig -> IO (Either WeatherCfgError WeatherConfig)
+loadWeatherConfig toml global = do
+    let decoded = decode (Toml.table weatherCodec "openweathermap") toml
+    case first ParseError decoded of
+        Left  e      -> pure $ Left e
+        Right parsed -> validate parsed
   where
-    withKey k toml' global'
-        | not (enabled toml') = Left Disabled
-        | otherwise = Right $ WeatherConfig
-            { weatherGlobalCfg = global'
-            , weatherEnabled   = enabled toml'
-            , weatherApiKey    = encodeUtf8 k
-            , weatherCityId    = encodeUtf8 $ cityId toml'
-            , weatherNotifBody = notifBody toml'
-            , weatherSyncFreq  = toDiffTime $ syncFrequency toml'
-            , weatherTemplate  = template toml'
+    validate parsed = do
+        apiKey <- loadSecret $ apiKeySrc parsed
+        if not (enabled parsed) -- ignore disabled module
+            then pure $ Left Disabled
+            else pure $ build apiKey parsed
+    build apiKey parsed = case apiKey of
+        Nothing  -> Left MissingApiKey
+        Just key -> Right WeatherConfig
+            { weatherGlobalCfg = global
+            , weatherEnabled   = enabled parsed
+            , weatherApiKey    = encodeUtf8 key
+            , weatherCityId    = encodeUtf8 $ cityId parsed
+            , weatherNotifBody = notifBody parsed
+            , weatherSyncFreq  = toDiffTime $ syncFrequency parsed
+            , weatherTemplate  = template parsed
             }
     toDiffTime val =
         let
             asInteger  = toInteger val
             normalized = if asInteger < 600 then 600 else asInteger
         in secondsToNominalDiffTime $ fromInteger normalized
-
 
 -- | OpenWeatherMap configuration options required by the application
 data WeatherConfig = WeatherConfig
@@ -65,7 +61,7 @@ data WeatherConfig = WeatherConfig
 -- | OpenWeatherMap configuration options as they can be read from the TOML configuration file
 data TomlWeatherConfig = TomlWeatherConfig
     { enabled :: Bool
-    , apiKey :: Maybe Text -- ^ Optional in the config file, can be specified via env variables
+    , apiKeySrc :: Text
     , cityId :: Text
     , notifBody :: Text
     , syncFrequency :: Natural
@@ -76,13 +72,13 @@ data WeatherCfgError
     = Disabled
     | MissingApiKey
     | ParseError DecodeException
-    deriving (Show)
+    deriving (Show, Eq)
 
 -- brittany-disable-next-binding
 weatherCodec :: TomlCodec TomlWeatherConfig
 weatherCodec = TomlWeatherConfig
     <$> Toml.bool "enabled" .= enabled
-    <*> Toml.dioptional (Toml.text "api_key") .= apiKey
+    <*> Toml.text "api_key" .= apiKeySrc
     <*> Toml.text "city_id" .= cityId
     <*> Toml.text "notification_body" .= notifBody
     <*> Toml.natural "sync_frequency" .= syncFrequency

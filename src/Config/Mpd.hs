@@ -1,7 +1,7 @@
 module Config.Mpd
     ( loadMpdConfig
     , MpdConfig(..)
-    , MpdCfgError
+    , MpdCfgError(..)
     )
 where
 
@@ -51,7 +51,7 @@ data MpdCfgError
     = Disabled
     | InvalidPath
     | ParseError DecodeException
-    deriving (Show)
+    deriving (Show, Eq)
 
 -- brittany-disable-next-binding
 mpdCodec :: TomlCodec TomlMpdConfig

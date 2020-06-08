@@ -1,7 +1,7 @@
 module Config.Global
     ( loadGlobalConfig
     , GlobalConfig(..)
-    , GlobalCfgError
+    , GlobalCfgError(..)
     )
 where
 

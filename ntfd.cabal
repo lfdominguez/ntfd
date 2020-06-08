@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a0438d507902947fd828245a33d06b9de062abc6a6743c0551a10b68f46bcace
+-- hash: 6296fe843f042ff7c3f80fae95de6bdb66ee13f0432263d80bb870aa514d76b9
 
 name:           ntfd
 version:        0.1.0
@@ -14,7 +14,7 @@ bug-reports:    https://github.com/kamek-pf/ntfd/issues
 author:         Bertrand Bousquet
 maintainer:     b.kamek@gmail.com
 copyright:      2020 Bertrand Bousquet
-license:        GPLv3
+license:        GPL-3
 license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
@@ -99,6 +99,7 @@ test-suite ntfd-test
   other-modules:
       Spec.Clients.OpenWeatherMap
       Spec.Config
+      Spec.Helpers
       Spec.Stores.Weather
       Spec.Weather
       Paths_ntfd

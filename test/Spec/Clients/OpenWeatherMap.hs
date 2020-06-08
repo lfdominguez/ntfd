@@ -1,33 +1,16 @@
 module Spec.Clients.OpenWeatherMap where
 
 import Control.Concurrent.Async (mapConcurrently)
-import Data.ByteString.Char8 (pack)
 import Data.Either (isRight)
-import Data.Maybe (fromJust)
-import Data.Time.Clock (secondsToNominalDiffTime)
-import System.Environment (lookupEnv)
 import Test.Hspec
 
-import Config.Weather (WeatherConfig(..))
+import Spec.Helpers (defaultWeatherCfg)
 import Clients.OpenWeatherMap (fetchOwm, toWeatherIcon, QueryType(..))
-
-defaultCfg :: IO WeatherConfig
-defaultCfg = do
-    apiKey <- lookupEnv "OWM_API_KEY"
-    pure WeatherConfig
-        { weatherEnabled   = True
-        , weatherApiKey    = fromJust $ pack <$> apiKey
-        , weatherCityId    = "6077243"
-        , weatherNotifBody = "hullo"
-        , weatherSyncFreq  = secondsToNominalDiffTime 1800
-        , weatherTemplate  =
-            "{{ temp_icon }} {{ temp_celcius }}°C {{ trend }} {{ forecast_icon }} {{ forecast_celcius }}°C"
-        }
 
 spec :: IO ()
 spec = hspec $ describe "OpenWeatherMap client" $ do
     it "should fetch data from OpenWeatherMap" $ do
-        config              <- defaultCfg
+        config              <- defaultWeatherCfg
         [current, forecast] <- mapConcurrently (fetchOwm config) [Current, Forecast]
         current `shouldSatisfy` isRight
         forecast `shouldSatisfy` isRight

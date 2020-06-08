@@ -1,7 +1,7 @@
 module Config.Twitch
     ( loadTwitchConfig
     , TwitchConfig(..)
-    , TwitchCfgError
+    , TwitchCfgError(..)
     )
 where
 
