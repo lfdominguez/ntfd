@@ -1,7 +1,6 @@
 module Config.Weather
     ( loadWeatherConfig
     , WeatherConfig(..)
-    , WeatherCfgError(..)
     )
 where
 
@@ -11,28 +10,28 @@ import Data.Text.Encoding (encodeUtf8)
 import Data.Time.Clock (secondsToNominalDiffTime, NominalDiffTime)
 import Data.ByteString (ByteString)
 import Numeric.Natural (Natural)
-import Toml ((.=), decode, TomlCodec, DecodeException)
+import Toml ((.=), decode, TomlCodec)
 import qualified Toml
 
 import Config.Env (loadSecret)
+import Config.Error (ConfigError(..))
 import Config.Global (GlobalConfig)
 
 -- | Load weather configuration from raw TOML content
-loadWeatherConfig :: Text -> GlobalConfig -> IO (Either WeatherCfgError WeatherConfig)
+loadWeatherConfig :: Text -> GlobalConfig -> IO (Either ConfigError WeatherConfig)
 loadWeatherConfig toml global = do
     let decoded = decode (Toml.table weatherCodec "openweathermap") toml
     case first ParseError decoded of
         Left  e      -> pure $ Left e
-        Right parsed -> validate parsed
+        Right parsed -> withEnv parsed
   where
-    validate parsed = do
+    withEnv parsed = do
         apiKey <- loadSecret $ apiKeySrc parsed
-        if not (enabled parsed) -- ignore disabled module
-            then pure $ Left Disabled
-            else pure $ build apiKey parsed
-    build apiKey parsed = case apiKey of
-        Nothing  -> Left MissingApiKey
-        Just key -> Right WeatherConfig
+        pure $ build apiKey parsed
+    build Nothing _ = Left MissingApiKey
+    build (Just key) parsed
+        | not (enabled parsed) = Left Disabled
+        | otherwise = Right WeatherConfig
             { weatherGlobalCfg = global
             , weatherEnabled   = enabled parsed
             , weatherApiKey    = encodeUtf8 key
@@ -67,12 +66,6 @@ data TomlWeatherConfig = TomlWeatherConfig
     , syncFrequency :: Natural
     , template :: Text
     }
-
-data WeatherCfgError
-    = Disabled
-    | MissingApiKey
-    | ParseError DecodeException
-    deriving (Show, Eq)
 
 -- brittany-disable-next-binding
 weatherCodec :: TomlCodec TomlWeatherConfig

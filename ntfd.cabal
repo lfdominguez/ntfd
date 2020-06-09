@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6296fe843f042ff7c3f80fae95de6bdb66ee13f0432263d80bb870aa514d76b9
+-- hash: f8ea62f32d270514f37ce048c3c50593d97227ddabf5183ac5b61c7ad259af88
 
 name:           ntfd
 version:        0.1.0
@@ -30,6 +30,7 @@ library
       Clients.OpenWeatherMap
       Config
       Config.Env
+      Config.Error
       Config.Global
       Config.Mpd
       Config.Twitch

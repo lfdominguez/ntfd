@@ -4,63 +4,51 @@ module Config
     , ConfigError(..)
 
     -- Global config
-    , G.loadGlobalConfig
-    , G.GlobalConfig(..)
-    , G.GlobalCfgError
+    , loadGlobalConfig
+    , GlobalConfig(..)
 
     -- Twitch config
-    , T.loadTwitchConfig
-    , T.TwitchConfig(..)
-    , T.TwitchCfgError
+    , loadTwitchConfig
+    , TwitchConfig(..)
 
     -- Weather config
-    , W.loadWeatherConfig
-    , W.WeatherConfig(..)
-    , W.WeatherCfgError
+    , loadWeatherConfig
+    , WeatherConfig(..)
 
     -- MPD config
-    , M.loadMpdConfig
-    , M.MpdConfig(..)
-    , M.MpdCfgError
+    , loadMpdConfig
+    , MpdConfig(..)
     )
 where
 
-import Control.Exception (try, IOException)
+import Control.Exception (try)
 import Data.Bifunctor (first)
 import qualified Data.Text.IO as TIO
 
-import qualified Config.Global as G
-import qualified Config.Twitch as T
-import qualified Config.Weather as W
-import qualified Config.Mpd as M
+import Config.Global
+import Config.Twitch
+import Config.Weather
+import Config.Mpd
+import Config.Error
 
 -- | ntfd main configuration
 data Config = Config
-    { twitchCfg :: Either T.TwitchCfgError T.TwitchConfig -- ^ Twitch configuration options
-    , weatherCfg :: Either W.WeatherCfgError W.WeatherConfig -- ^ OpenWeatherMap configuration options
-    , mpdCfg :: Either M.MpdCfgError M.MpdConfig -- ^ MPD configuration options
+    { twitchCfg :: Either ConfigError TwitchConfig -- ^ Twitch configuration options
+    , weatherCfg :: Either ConfigError WeatherConfig -- ^ OpenWeatherMap configuration options
+    , mpdCfg :: Either ConfigError MpdConfig -- ^ MPD configuration options
     } deriving (Show)
 
 loadConfig :: FilePath -> IO (Either ConfigError Config)
 loadConfig path = do
     readRes <- first IOError <$> try (TIO.readFile path)
-    let globalRes = G.loadGlobalConfig <$> readRes
+    let globalRes = loadGlobalConfig =<< readRes
     case (readRes, globalRes) of
-        (Right content, Right (Right global)) -> builder content global
-        (Left  e      , _                   ) -> pure $ Left e
-        (_            , Left e              ) -> pure $ Left e
-        (_            , Right (Left e)      ) -> pure $ Left $ GlobalCfgError e
+        (Right content, Right global) -> builder content global
+        (Left  e      , _           ) -> pure $ Left e
+        (_            , Left e      ) -> pure $ Left e
   where
     builder content global = do
-        let twitchCfg  = T.loadTwitchConfig content
-        let mpdCfg     = M.loadMpdConfig content global
-        weatherCfg <- W.loadWeatherConfig content global
+        let twitchCfg = loadTwitchConfig content
+        mpdCfg     <- loadMpdConfig content global
+        weatherCfg <- loadWeatherConfig content global
         pure $ Right Config { .. }
-
-data ConfigError
-    = IOError IOException
-    | GlobalCfgError G.GlobalCfgError
-    | WeatherCfgError W.WeatherCfgError
-    | MpdCfgError M.MpdCfgError
-    | TwitchCfgError T.TwitchCfgError
-    deriving (Show)

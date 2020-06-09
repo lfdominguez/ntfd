@@ -1,16 +1,17 @@
 module Config.Twitch
     ( loadTwitchConfig
     , TwitchConfig(..)
-    , TwitchCfgError(..)
     )
 where
 
 import Data.Bifunctor (first)
 import Data.Text (Text)
-import Toml ((.=), decode, TomlCodec, DecodeException)
+import Toml ((.=), decode, TomlCodec)
 import qualified Toml
 
-loadTwitchConfig :: Text -> Either TwitchCfgError TwitchConfig
+import Config.Error (ConfigError(..))
+
+loadTwitchConfig :: Text -> Either ConfigError TwitchConfig
 loadTwitchConfig toml = first ParseError $ decode (Toml.table twitchCodec "twitch") toml
 
 -- | Twitch configuration options required by the application
@@ -18,8 +19,6 @@ data TwitchConfig = TwitchConfig
     { twitchEnabled :: Bool
     , twitchClientId :: Text
     } deriving (Show)
-
-newtype TwitchCfgError = ParseError DecodeException deriving (Show)
 
 -- brittany-disable-next-binding
 twitchCodec :: TomlCodec TwitchConfig

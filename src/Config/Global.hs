@@ -1,7 +1,6 @@
 module Config.Global
     ( loadGlobalConfig
     , GlobalConfig(..)
-    , GlobalCfgError(..)
     )
 where
 
@@ -9,10 +8,12 @@ import Data.Bifunctor (first)
 import Data.Text (Text)
 import Data.Time.Clock (secondsToNominalDiffTime, NominalDiffTime)
 import Numeric.Natural (Natural)
-import Toml ((.=), decode, TomlCodec, DecodeException)
+import Toml ((.=), decode, TomlCodec)
 import qualified Toml
 
-loadGlobalConfig :: Text -> Either GlobalCfgError GlobalConfig
+import Config.Error (ConfigError(..))
+
+loadGlobalConfig :: Text -> Either ConfigError GlobalConfig
 loadGlobalConfig toml = do
     parsed <- first ParseError $ decode (Toml.table globalCodec "global") toml
     pure $ GlobalConfig { notificationTimeout = toDiffTime (timeout parsed) }
@@ -28,8 +29,6 @@ data GlobalConfig = GlobalConfig
 data TomlGlobalConfig = TomlGlobalConfig
     { timeout :: Natural
     }
-
-newtype GlobalCfgError = ParseError DecodeException deriving (Show)
 
 globalCodec :: TomlCodec TomlGlobalConfig
 globalCodec = TomlGlobalConfig <$> Toml.natural "notification_timeout" .= timeout

@@ -5,13 +5,12 @@ where
 
 import Control.Monad (when)
 import Control.Concurrent.Async (async, waitAny)
-import Data.Bifunctor (first)
 import Data.Either (rights)
 import DBus.Client (connectSession, requestName, RequestNameReply(..))
 import System.Directory (getXdgDirectory, XdgDirectory(..))
 import System.Exit (exitFailure)
 
-import Config (loadConfig, Config(..), ConfigError(..))
+import Config (loadConfig, Config(..))
 import Modules.Weather (weatherStringsSvc)
 import Modules.Mpd (mpdNotifSvc)
 
@@ -34,8 +33,8 @@ main = do
         exitFailure
 
     -- Prepare services
-    let weatherSvc = first WeatherCfgError $ weatherStringsSvc client <$> weatherCfg config
-    let mpdSvc = first MpdCfgError $ mpdNotifSvc client <$> mpdCfg config
+    let weatherSvc  = weatherStringsSvc client <$> weatherCfg config
+    let mpdSvc      = mpdNotifSvc client <$> mpdCfg config
     let allServices = [weatherSvc, mpdSvc]
 
     -- Log which services failed to initialize / are disabled

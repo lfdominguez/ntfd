@@ -4,10 +4,8 @@ import Data.Maybe (isJust)
 import Data.Text (breakOnEnd, pack)
 import Test.Hspec
 
-import Config (loadConfig, Config(..), MpdConfig(..), WeatherConfig(..))
+import Config (loadConfig, Config(..), MpdConfig(..), WeatherConfig(..), ConfigError(..))
 import Config.Env (expandPath, loadSecret)
-import qualified Config.Mpd as MErr (MpdCfgError(..))
-import qualified Config.Weather as WErr (WeatherCfgError(..))
 
 spec :: IO ()
 spec = hspec $ describe "Configuration" $ do
@@ -16,10 +14,10 @@ spec = hspec $ describe "Configuration" $ do
         let Right config           = toml
 
         let Left  weatherConfigErr = weatherCfg config
-        weatherConfigErr `shouldBe` WErr.Disabled
+        weatherConfigErr `shouldBe` Disabled
 
         let Left mpdConfigErr = mpdCfg config
-        mpdConfigErr `shouldBe` MErr.Disabled
+        mpdConfigErr `shouldBe` Disabled
 
     it "should read test config file (everything enabled)" $ do
         toml <- loadConfig "test/Spec/test-config.toml"

@@ -1,33 +1,40 @@
 module Config.Mpd
     ( loadMpdConfig
     , MpdConfig(..)
-    , MpdCfgError(..)
     )
 where
 
 import Data.Bifunctor (first)
 import Data.Text (Text)
-import Toml ((.=), decode, TomlCodec, DecodeException)
-import System.FilePath (isValid)
+import Toml ((.=), decode, TomlCodec)
+import System.Directory (doesDirectoryExist)
 import qualified Toml
 
+import Config.Env (expandPath)
+import Config.Error (ConfigError(..))
 import Config.Global (GlobalConfig(..))
 
 -- | Load mpd configuration from raw TOML content
-loadMpdConfig :: Text -> GlobalConfig -> Either MpdCfgError MpdConfig
+loadMpdConfig :: Text -> GlobalConfig -> IO (Either ConfigError MpdConfig)
 loadMpdConfig toml global = do
-    parsed <- first ParseError $ decode (Toml.table mpdCodec "mpd") toml
-    fromToml parsed
+    let decoded = decode (Toml.table mpdCodec "mpd") toml
+    case first ParseError decoded of
+        Left  e      -> pure $ Left e
+        Right parsed -> withEnv parsed
   where
-    fromToml toml'
-        | not (enabled toml') = Left Disabled
-        | not (isValid (musicDirectory toml')) = Left InvalidPath
+    withEnv parsed = do
+        musicDir       <- expandPath $ musicDirectory parsed
+        musicDirExists <- doesDirectoryExist musicDir
+        pure $ build musicDir musicDirExists parsed
+    build musicDir musicDirExists parsed
+        | not (enabled parsed) = Left Disabled
+        | not musicDirExists = Left InvalidPath
         | otherwise = Right $ MpdConfig
             { mpdGlobalCfg        = global
-            , mpdEnabled          = enabled toml'
-            , mpdMusicDirectory   = musicDirectory toml'
-            , mpdCoverName        = coverName toml'
-            , mpdSkipMissingCover = skipMissingCover toml'
+            , mpdEnabled          = enabled parsed
+            , mpdMusicDirectory   = musicDir
+            , mpdCoverName        = coverName parsed
+            , mpdSkipMissingCover = skipMissingCover parsed
             }
 
 -- | MPD configuration options required by the application
@@ -46,12 +53,6 @@ data TomlMpdConfig = TomlMpdConfig
     , coverName :: String
     , skipMissingCover :: Bool
     }
-
-data MpdCfgError
-    = Disabled
-    | InvalidPath
-    | ParseError DecodeException
-    deriving (Show, Eq)
 
 -- brittany-disable-next-binding
 mpdCodec :: TomlCodec TomlMpdConfig
