@@ -6,6 +6,7 @@ module Helpers
     , fromEither
     , fromMaybe
     , toDiffTime
+    , normalizeDuration
     , NotificationType(..)
     )
 where
@@ -30,23 +31,33 @@ data NotificationType
     | Twitch
     deriving (Show, Eq)
 
--- | COnvert a natural number to a nominal diff time
+-- | Convert a natural number (in seconds) to a nominal diff time.
 toDiffTime :: Natural -> NominalDiffTime
 toDiffTime = secondsToNominalDiffTime . fromInteger . toInteger
 
--- | Wait for a given amount of time
+-- | Convert a natural number and a fallback (both in seconds) to a nominal diff time.
+-- If the provided value is lower than the fallback, the fallback is used.
+normalizeDuration :: Natural -> Natural -> NominalDiffTime
+normalizeDuration duration fallback =
+    let
+        nDuration  = toInteger duration
+        nFallback  = toInteger fallback
+        normalized = if nDuration < nFallback then nFallback else nDuration
+    in secondsToNominalDiffTime $ fromInteger normalized
+
+-- | Wait for a given amount of time.
 sleep :: NominalDiffTime -> IO ()
 sleep = threadDelay . toMicroSeconds where toMicroSeconds = (1000000 *) . fromInteger . round
 
 -- | Capitalize a Text string, first character will be uppercased
--- and the rest will be lowercased
+-- and the rest will be lowercased.
 capitalize :: Text -> Text
 capitalize text = case T.uncons text of
     Nothing     -> text
     Just (h, t) -> let lowered = T.toLower t in T.cons (C.toUpper h) lowered
 
 -- The following functions help mapping our data types to work around DBus' lack of null type
--- Usefull to return empty strings
+-- Usefull to return empty strings.
 fromEither :: (Monoid t) => Either e t -> t
 fromEither (Left  _) = mempty
 fromEither (Right t) = t
@@ -55,7 +66,7 @@ fromMaybe :: (Monoid t) => Maybe t -> t
 fromMaybe Nothing  = mempty
 fromMaybe (Just t) = t
 
--- | Send a desktop notification via DBus
+-- | Send a desktop notification via DBus.
 notify :: Client -> NotificationType -> Text -> Text -> Maybe Text -> NominalDiffTime -> IO ()
 notify client nType title text icon timeout = callNoReply client params
   where

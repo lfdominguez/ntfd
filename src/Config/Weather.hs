@@ -7,7 +7,7 @@ where
 import Data.Bifunctor (first)
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
-import Data.Time.Clock (secondsToNominalDiffTime, NominalDiffTime)
+import Data.Time.Clock (NominalDiffTime)
 import Data.ByteString (ByteString)
 import Numeric.Natural (Natural)
 import Toml ((.=), decode, TomlCodec)
@@ -15,7 +15,7 @@ import qualified Toml
 
 import Config.Env (loadSecret)
 import Config.Error (ConfigError(..))
-import Helpers (toDiffTime)
+import Helpers (normalizeDuration, toDiffTime)
 
 -- | Load weather configuration from raw TOML content
 loadWeatherConfig :: Text -> IO (Either ConfigError WeatherConfig)
@@ -37,14 +37,9 @@ loadWeatherConfig toml = do
             , weatherCityId       = encodeUtf8 $ cityId parsed
             , weatherNotifBody    = notifBody parsed
             , weatherNotifTimeout = toDiffTime $ notifTimeout parsed
-            , weatherSyncFreq     = normalize $ syncFrequency parsed
+            , weatherSyncFreq     = normalizeDuration 600 $ syncFrequency parsed
             , weatherTemplate     = template parsed
             }
-    normalize val =
-        let
-            asInteger  = toInteger val
-            normalized = if asInteger < 600 then 600 else asInteger
-        in secondsToNominalDiffTime $ fromInteger normalized
 
 -- | OpenWeatherMap configuration options required by the application
 data WeatherConfig = WeatherConfig

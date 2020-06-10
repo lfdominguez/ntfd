@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7ff2cc701e721a2512c62483d87eb9a9ceb7bf1cd8a7d6fc1cf07a000d9ea14a
+-- hash: 900076e8c0c30f8e3488a867f60f639e8fde07ceb597abf36886785dc0dce1e8
 
 name:           ntfd
 version:        0.1.0
@@ -36,6 +36,7 @@ library
       Config.Twitch
       Config.Weather
       Helpers
+      Stores.Github
       Stores.Twitch
       Stores.Weather
       Types.Weather

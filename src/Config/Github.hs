@@ -15,7 +15,7 @@ import qualified Toml
 
 import Config.Env (expandPath, loadSecret)
 import Config.Error (ConfigError(..))
-import Helpers (toDiffTime)
+import Helpers (normalizeDuration, toDiffTime)
 
 -- | Load github configuration from raw TOML content
 loadGithubConfig :: Text -> IO (Either ConfigError GithubConfig)
@@ -37,7 +37,7 @@ loadGithubConfig toml = do
             , githubApiKey     = encodeUtf8 key
             , githubNotifTime  = toDiffTime $ notifTimeout parsed
             , githubShowAvatar = showAvatar parsed
-            , githubSyncFreq   = toDiffTime $ syncFrequency parsed
+            , githubSyncFreq   = normalizeDuration 10 $ syncFrequency parsed
             , githubTemplate   = template parsed
             , githubAvatarDir  = cacheDir
             }

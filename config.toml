@@ -48,6 +48,7 @@ notification_timeout = 20
 # Whether or not the organization/owner avatar should be shown in the notification
 show_avatar = true
 # How often should we fetch from the GitHub API (in seconds)
+# Will default to 10 seconds for values under 10 seconds
 sync_frequency = 30
 # Output format, using Handlebars syntax, meaning variables should be used like {{ this }}
 # Available tokens are:
