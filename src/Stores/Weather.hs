@@ -173,9 +173,9 @@ renderTemplate w t = do
         , "forecast_icon" .= forecastIcon w
         ]
     trend c f
-        | c < f = '\59621' -- ^ trending up
-        | c > f = '\59619' -- ^ trending down
-        | otherwise = '\59620' -- ^ flat
+        | c < f = '\59621' -- trending up
+        | c > f = '\59619' -- trending down
+        | otherwise = '\59620' -- flat
     valueAs target temp = let Temperature value _ = convert temp target in round value :: Int
     current = currentTemperature w
     forecast = forecastTemperature w
