@@ -124,6 +124,9 @@ docker run --rm -ti -v $(pwd):/mnt kamek-pf/ntfd /bin/sh -c 'cp ntfd /mnt'
 ```
 The binary will be available as `ntfd` from the project's root.
 
+## Run tests
+The test suite expects a valid `OWM_API_KEY` and `GITHUB_TOKEN` environment variables. Simply run `stack test`.
+
 ## Troubleshooting
 
 ##### My Dunst notification icons look tiny

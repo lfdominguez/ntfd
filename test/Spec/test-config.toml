@@ -7,7 +7,7 @@ enabled = true
 # api_key = "file:~/your_folder/some-key.txt"   # Read from a file
 # api_key = "env:OWM_API_KEY"                   # Read from an environment variable
 # api_key = "PLAINTEXT_VALUE"                   # Read the value directly
-api_key = "file:~/.config/ntfd/openweathermap.txt"
+api_key = "env:OWM_API_KEY"
 # This is for Montreal, find your city at https://openweathermap.org
 # The id will be the last part of the URL
 city_id = "6077243"
@@ -42,7 +42,7 @@ enabled = true
 # api_key = "file:~/your_folder/some-token.txt"   # Read from a file
 # api_key = "env:GITHUB_TOKEN"                    # Read from an environment variable
 # api_key = "PLAINTEXT_VALUE"                     # Read the value directly
-api_key = "file:~/.config/ntfd/github.txt"
+api_key = "env:GITHUB_TOKEN"
 # How long GitHub notifications should stay up (in seconds)
 notification_timeout = 20
 # Whether or not the organization/owner avatar should be shown in the notification

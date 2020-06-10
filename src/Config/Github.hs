@@ -20,7 +20,7 @@ import Helpers (toDiffTime)
 -- | Load github configuration from raw TOML content
 loadGithubConfig :: Text -> IO (Either ConfigError GithubConfig)
 loadGithubConfig toml = do
-    let decoded = decode (Toml.table githubCodec "opengithubmap") toml
+    let decoded = decode (Toml.table githubCodec "github") toml
     case first ParseError decoded of
         Left  e      -> pure $ Left e
         Right parsed -> withEnv parsed

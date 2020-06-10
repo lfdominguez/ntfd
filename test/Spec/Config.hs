@@ -1,10 +1,11 @@
 module Spec.Config where
 
 import Data.Maybe (isJust)
-import Data.Text (breakOnEnd, pack)
+import Data.Text (breakOn, breakOnEnd, pack)
 import Test.Hspec
 
-import Config (loadConfig, Config(..), MpdConfig(..), WeatherConfig(..), ConfigError(..))
+import Config
+    (loadConfig, Config(..), MpdConfig(..), GithubConfig(..), WeatherConfig(..), ConfigError(..))
 import Config.Env (expandPath, loadSecret)
 
 spec :: IO ()
@@ -28,6 +29,14 @@ spec = hspec $ describe "Configuration" $ do
         let cityId              = weatherCityId weatherConfig
         weatherOn `shouldBe` True
         cityId `shouldBe` "6077243"
+
+        let Right githubConfig = githubCfg config
+        let githubOn           = githubEnabled githubConfig
+        let withAvatars        = githubShowAvatar githubConfig
+        let (_, cacheDir) = breakOn ".cache/ntfd" $ pack $ githubAvatarDir githubConfig
+        githubOn `shouldBe` True
+        withAvatars `shouldBe` True
+        cacheDir `shouldBe` ".cache/ntfd/github_avatars"
 
         let Right mpdConfig = mpdCfg config
         let mpdOn           = mpdEnabled mpdConfig
