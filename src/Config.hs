@@ -3,10 +3,6 @@ module Config
     , Config(..)
     , ConfigError(..)
 
-    -- Global config
-    , loadGlobalConfig
-    , GlobalConfig(..)
-
     -- Twitch config
     , loadTwitchConfig
     , TwitchConfig(..)
@@ -14,6 +10,10 @@ module Config
     -- Weather config
     , loadWeatherConfig
     , WeatherConfig(..)
+
+    -- Github config
+    , loadGithubConfig
+    , GithubConfig(..)
 
     -- MPD config
     , loadMpdConfig
@@ -25,7 +25,7 @@ import Control.Exception (try)
 import Data.Bifunctor (first)
 import qualified Data.Text.IO as TIO
 
-import Config.Global
+import Config.Github
 import Config.Twitch
 import Config.Weather
 import Config.Mpd
@@ -35,20 +35,20 @@ import Config.Error
 data Config = Config
     { twitchCfg :: Either ConfigError TwitchConfig -- ^ Twitch configuration options
     , weatherCfg :: Either ConfigError WeatherConfig -- ^ OpenWeatherMap configuration options
+    , githubCfg :: Either ConfigError GithubConfig -- ^ Github configuration options
     , mpdCfg :: Either ConfigError MpdConfig -- ^ MPD configuration options
     } deriving (Show)
 
 loadConfig :: FilePath -> IO (Either ConfigError Config)
 loadConfig path = do
     readRes <- first IOError <$> try (TIO.readFile path)
-    let globalRes = loadGlobalConfig =<< readRes
-    case (readRes, globalRes) of
-        (Right content, Right global) -> builder content global
-        (Left  e      , _           ) -> pure $ Left e
-        (_            , Left e      ) -> pure $ Left e
+    case readRes of
+        Right content -> builder content
+        Left  e       -> pure $ Left e
   where
-    builder content global = do
+    builder content = do
         let twitchCfg = loadTwitchConfig content
-        mpdCfg     <- loadMpdConfig content global
-        weatherCfg <- loadWeatherConfig content global
+        mpdCfg     <- loadMpdConfig content
+        weatherCfg <- loadWeatherConfig content
+        githubCfg  <- loadGithubConfig content
         pure $ Right Config { .. }

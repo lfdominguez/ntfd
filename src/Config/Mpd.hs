@@ -6,17 +6,19 @@ where
 
 import Data.Bifunctor (first)
 import Data.Text (Text)
-import Toml ((.=), decode, TomlCodec)
+import Data.Time.Clock (NominalDiffTime)
 import System.Directory (doesDirectoryExist)
+import Numeric.Natural (Natural)
+import Toml ((.=), decode, TomlCodec)
 import qualified Toml
 
 import Config.Env (expandPath)
 import Config.Error (ConfigError(..))
-import Config.Global (GlobalConfig(..))
+import Helpers (toDiffTime)
 
 -- | Load mpd configuration from raw TOML content
-loadMpdConfig :: Text -> GlobalConfig -> IO (Either ConfigError MpdConfig)
-loadMpdConfig toml global = do
+loadMpdConfig :: Text -> IO (Either ConfigError MpdConfig)
+loadMpdConfig toml = do
     let decoded = decode (Toml.table mpdCodec "mpd") toml
     case first ParseError decoded of
         Left  e      -> pure $ Left e
@@ -30,19 +32,19 @@ loadMpdConfig toml global = do
         | not (enabled parsed) = Left Disabled
         | not musicDirExists = Left InvalidPath
         | otherwise = Right $ MpdConfig
-            { mpdGlobalCfg        = global
-            , mpdEnabled          = enabled parsed
+            { mpdEnabled          = enabled parsed
             , mpdMusicDirectory   = musicDir
             , mpdCoverName        = coverName parsed
+            , mpdNotifTimeout     = toDiffTime $ notifTimeout parsed
             , mpdSkipMissingCover = skipMissingCover parsed
             }
 
 -- | MPD configuration options required by the application
 data MpdConfig = MpdConfig
-    { mpdGlobalCfg :: GlobalConfig
-    , mpdEnabled :: Bool
+    { mpdEnabled :: Bool
     , mpdMusicDirectory :: FilePath
     , mpdCoverName :: String
+    , mpdNotifTimeout :: NominalDiffTime
     , mpdSkipMissingCover :: Bool
     } deriving (Show)
 
@@ -51,6 +53,7 @@ data TomlMpdConfig = TomlMpdConfig
     { enabled :: Bool
     , musicDirectory :: FilePath
     , coverName :: String
+    , notifTimeout :: Natural
     , skipMissingCover :: Bool
     }
 
@@ -60,4 +63,5 @@ mpdCodec = TomlMpdConfig
     <$> Toml.bool "enabled" .= enabled
     <*> Toml.string "music_directory" .= musicDirectory
     <*> Toml.string "cover_name" .= coverName
+    <*> Toml.natural "notification_timeout" .= notifTimeout
     <*> Toml.bool "skip_missing_cover" .= skipMissingCover

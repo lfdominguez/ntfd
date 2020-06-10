@@ -15,7 +15,7 @@ import qualified Data.Map as M
 import qualified Data.Text as T
 
 import Helpers (notify, NotificationType(..))
-import Config (GlobalConfig(..), MpdConfig(..))
+import Config (MpdConfig(..))
 
 -- MPD notification service, watches player state changes and sends
 -- notifications on track change
@@ -51,13 +51,13 @@ mpdNotifSvc client config = do
             (Just [title], Just [artist], Just [album], _) -> do
                 let nHead    = toText title
                 let nBody    = toText artist <> " - " <> toText album
-                let nTimeout = (notificationTimeout . mpdGlobalCfg) config
+                let nTimeout = mpdNotifTimeout config
                 when (shouldNotify cover) $ notify client Mpd nHead nBody cover nTimeout
             -- Streaming content
             (Just [title], _, _, Just [name]) -> do
                 let nHead    = toText title
                 let nBody    = toText name
-                let nTimeout = (notificationTimeout . mpdGlobalCfg) config
+                let nTimeout = mpdNotifTimeout config
                 when (shouldNotify cover) $ notify client Mpd nHead nBody cover nTimeout
             _ -> pure ()
     getCoverPath song = do

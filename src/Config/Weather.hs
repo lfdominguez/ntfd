@@ -15,11 +15,11 @@ import qualified Toml
 
 import Config.Env (loadSecret)
 import Config.Error (ConfigError(..))
-import Config.Global (GlobalConfig)
+import Helpers (toDiffTime)
 
 -- | Load weather configuration from raw TOML content
-loadWeatherConfig :: Text -> GlobalConfig -> IO (Either ConfigError WeatherConfig)
-loadWeatherConfig toml global = do
+loadWeatherConfig :: Text -> IO (Either ConfigError WeatherConfig)
+loadWeatherConfig toml = do
     let decoded = decode (Toml.table weatherCodec "openweathermap") toml
     case first ParseError decoded of
         Left  e      -> pure $ Left e
@@ -32,15 +32,15 @@ loadWeatherConfig toml global = do
     build (Just key) parsed
         | not (enabled parsed) = Left Disabled
         | otherwise = Right WeatherConfig
-            { weatherGlobalCfg = global
-            , weatherEnabled   = enabled parsed
-            , weatherApiKey    = encodeUtf8 key
-            , weatherCityId    = encodeUtf8 $ cityId parsed
-            , weatherNotifBody = notifBody parsed
-            , weatherSyncFreq  = toDiffTime $ syncFrequency parsed
-            , weatherTemplate  = template parsed
+            { weatherEnabled      = enabled parsed
+            , weatherApiKey       = encodeUtf8 key
+            , weatherCityId       = encodeUtf8 $ cityId parsed
+            , weatherNotifBody    = notifBody parsed
+            , weatherNotifTimeout = toDiffTime $ notifTimeout parsed
+            , weatherSyncFreq     = normalize $ syncFrequency parsed
+            , weatherTemplate     = template parsed
             }
-    toDiffTime val =
+    normalize val =
         let
             asInteger  = toInteger val
             normalized = if asInteger < 600 then 600 else asInteger
@@ -48,11 +48,11 @@ loadWeatherConfig toml global = do
 
 -- | OpenWeatherMap configuration options required by the application
 data WeatherConfig = WeatherConfig
-    { weatherGlobalCfg :: GlobalConfig
-    , weatherEnabled :: Bool
+    { weatherEnabled :: Bool
     , weatherApiKey :: ByteString
     , weatherCityId :: ByteString
     , weatherNotifBody :: Text
+    , weatherNotifTimeout :: NominalDiffTime
     , weatherSyncFreq :: NominalDiffTime
     , weatherTemplate :: Text
     } deriving (Show)
@@ -63,6 +63,7 @@ data TomlWeatherConfig = TomlWeatherConfig
     , apiKeySrc :: Text
     , cityId :: Text
     , notifBody :: Text
+    , notifTimeout :: Natural
     , syncFrequency :: Natural
     , template :: Text
     }
@@ -74,5 +75,6 @@ weatherCodec = TomlWeatherConfig
     <*> Toml.text "api_key" .= apiKeySrc
     <*> Toml.text "city_id" .= cityId
     <*> Toml.text "notification_body" .= notifBody
+    <*> Toml.natural "notification_timeout" .= notifTimeout
     <*> Toml.natural "sync_frequency" .= syncFrequency
     <*> Toml.text "display" .= template

@@ -5,17 +5,19 @@ module Helpers
     , capitalize
     , fromEither
     , fromMaybe
+    , toDiffTime
     , NotificationType(..)
     )
 where
 
 import Control.Concurrent (threadDelay)
+import Data.Int (Int32)
 import Data.Text (Text)
-import Data.Time.Clock (NominalDiffTime)
+import Data.Time.Clock (secondsToNominalDiffTime, NominalDiffTime)
+import Data.Word (Word32)
 import DBus (methodCall, methodCallDestination, methodCallBody, toVariant, Variant)
 import DBus.Client (callNoReply, Client)
-import Data.Int (Int32)
-import Data.Word (Word32)
+import Numeric.Natural (Natural)
 import qualified Data.Text as T
 import qualified Data.Char as C
 import qualified Data.Map as M
@@ -27,6 +29,31 @@ data NotificationType
     | Mpd
     | Twitch
     deriving (Show, Eq)
+
+-- | COnvert a natural number to a nominal diff time
+toDiffTime :: Natural -> NominalDiffTime
+toDiffTime = secondsToNominalDiffTime . fromInteger . toInteger
+
+-- | Wait for a given amount of time
+sleep :: NominalDiffTime -> IO ()
+sleep = threadDelay . toMicroSeconds where toMicroSeconds = (1000000 *) . fromInteger . round
+
+-- | Capitalize a Text string, first character will be uppercased
+-- and the rest will be lowercased
+capitalize :: Text -> Text
+capitalize text = case T.uncons text of
+    Nothing     -> text
+    Just (h, t) -> let lowered = T.toLower t in T.cons (C.toUpper h) lowered
+
+-- The following functions help mapping our data types to work around DBus' lack of null type
+-- Usefull to return empty strings
+fromEither :: (Monoid t) => Either e t -> t
+fromEither (Left  _) = mempty
+fromEither (Right t) = t
+
+fromMaybe :: (Monoid t) => Maybe t -> t
+fromMaybe Nothing  = mempty
+fromMaybe (Just t) = t
 
 -- | Send a desktop notification via DBus
 notify :: Client -> NotificationType -> Text -> Text -> Maybe Text -> NominalDiffTime -> IO ()
@@ -55,24 +82,3 @@ notify client nType title text icon timeout = callNoReply client params
         , toVariant (toSeconds timeout :: Int32)
         ]
     toSeconds = (1000 *) . fromInteger . round
-
--- | Wait for a given amount of time
-sleep :: NominalDiffTime -> IO ()
-sleep = threadDelay . toMicroSeconds where toMicroSeconds = (1000000 *) . fromInteger . round
-
--- | Capitalize a Text string, first character will be uppercased
--- and the rest will be lowercased
-capitalize :: Text -> Text
-capitalize text = case T.uncons text of
-    Nothing     -> text
-    Just (h, t) -> let lowered = T.toLower t in T.cons (C.toUpper h) lowered
-
--- The following functions help mapping our data types to work around DBus' lack of null type
--- Usefull to return empty strings
-fromEither :: (Monoid t) => Either e t -> t
-fromEither (Left  _) = mempty
-fromEither (Right t) = t
-
-fromMaybe :: (Monoid t) => Maybe t -> t
-fromMaybe Nothing  = mempty
-fromMaybe (Just t) = t

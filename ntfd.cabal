@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f8ea62f32d270514f37ce048c3c50593d97227ddabf5183ac5b61c7ad259af88
+-- hash: 7ff2cc701e721a2512c62483d87eb9a9ceb7bf1cd8a7d6fc1cf07a000d9ea14a
 
 name:           ntfd
 version:        0.1.0
@@ -31,10 +31,11 @@ library
       Config
       Config.Env
       Config.Error
-      Config.Global
+      Config.Github
       Config.Mpd
       Config.Twitch
       Config.Weather
+      Helpers
       Stores.Twitch
       Stores.Weather
       Types.Weather
@@ -66,7 +67,6 @@ library
 executable ntfd
   main-is: Main.hs
   other-modules:
-      Helpers
       Modules.Mpd
       Modules.Weather
       Paths_ntfd
