@@ -21,7 +21,7 @@ spec = hspec $ describe "Configuration" $ do
         mpdConfigErr `shouldBe` Disabled
 
     it "should read test config file (everything enabled)" $ do
-        toml <- loadConfig "test/Spec/test-config.toml"
+        toml <- loadConfig "test/samples/test_config.toml"
         let Right config        = toml
 
         let Right weatherConfig = weatherCfg config
@@ -54,7 +54,7 @@ spec = hspec $ describe "Configuration" $ do
         full `shouldBe` fullPath
 
     it "should load secrets from different sources" $ do
-        secretFile <- loadSecret "file:test/Spec/test-token.txt"
+        secretFile <- loadSecret "file:test/samples/test_github_token.txt"
         secretFile `shouldBe` Just "some-secret-token"
 
         secretEnv <- loadSecret "env:OWM_API_KEY"

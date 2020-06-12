@@ -14,6 +14,7 @@ import Numeric.Natural (Natural)
 import Text.Microstache (compileMustacheText, renderMustacheW, MustacheWarning)
 import Text.Parsec (ParseError)
 
+import Clients.Github (RestNotification(..))
 import Config (GithubConfig(..))
 
 -- | Query and update Github data.
@@ -39,12 +40,7 @@ data GithubData = GithubData
     , notifications :: [GithubNotification]
     }
 
--- A Github notification
-data GithubNotification = GithubNotification
-    { notificationId :: Text
-    , isNew :: Bool
-    , title :: Text
-    }
+data GithubNotification = GithubNotification | Kek
 
 instance Store GithubClient where
     initGithubStore config = do

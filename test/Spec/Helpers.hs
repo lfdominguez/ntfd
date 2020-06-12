@@ -48,7 +48,7 @@ defaultWeatherCfg = do
 
 defaultGithubCfg :: IO GithubConfig
 defaultGithubCfg = do
-    apiKey <- lookupEnv "GITHUB_API_KEY"
+    apiKey <- lookupEnv "GITHUB_TOKEN"
     pure GithubConfig
         { githubEnabled    = True
         , githubApiKey     = fromJust $ pack <$> apiKey

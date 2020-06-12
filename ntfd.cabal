@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 900076e8c0c30f8e3488a867f60f639e8fde07ceb597abf36886785dc0dce1e8
+-- hash: cbea40aa40ccc9292439edc7c258b1fa66860592f58575807af92b06e38b4723
 
 name:           ntfd
 version:        0.1.0
@@ -27,6 +27,7 @@ source-repository head
 
 library
   exposed-modules:
+      Clients.Github
       Clients.OpenWeatherMap
       Config
       Config.Env
@@ -99,6 +100,7 @@ test-suite ntfd-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Spec.Clients.Github
       Spec.Clients.OpenWeatherMap
       Spec.Config
       Spec.Helpers
