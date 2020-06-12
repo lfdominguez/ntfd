@@ -14,11 +14,11 @@ import Data.Text.Lazy (toStrict, fromStrict)
 import Text.Microstache (compileMustacheText, renderMustacheW, MustacheWarning)
 import Text.Parsec (ParseError)
 
-import qualified Clients.OpenWeatherMap as Owm
 import Clients.OpenWeatherMap
     (fetchOwm, isDegradedConditions, toSymbolicName, toWeatherIcon, OwmResponse(..), QueryType(..))
 import Types.Weather (convert, Temperature(..), Unit(..))
 import Config (WeatherConfig(..))
+import qualified Clients.OpenWeatherMap as Owm
 
 -- | Query and update Weather data.
 class Store s where

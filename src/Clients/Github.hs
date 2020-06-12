@@ -3,6 +3,7 @@ module Clients.Github
     , parseBytes
     , RestNotification(..)
     , NotificationType(..)
+    , Error(..)
     )
 where
 

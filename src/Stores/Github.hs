@@ -16,6 +16,7 @@ import Text.Parsec (ParseError)
 
 import Clients.Github (RestNotification(..))
 import Config (GithubConfig(..))
+import qualified Clients.Github as Gh
 
 -- | Query and update Github data.
 class Store s where
@@ -28,7 +29,7 @@ data GithubClient = GithubClient
     , internalState :: MVar InternalState
     }
 
--- Holds internal state: rendered template and github data from OWM
+-- Holds internal state: rendered template and notification data from Github
 data InternalState = InternalState
     { githubData :: GithubData
     , renderedTemplate :: Either Error Text
@@ -67,5 +68,5 @@ data Error
     = Parse ParseError
     | Render [MustacheWarning]
     | Unsynchronized
-    -- Owm [Owm.Error]
+    | GithubApi Gh.Error
     deriving (Show)
