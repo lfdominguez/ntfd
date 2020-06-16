@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: cbea40aa40ccc9292439edc7c258b1fa66860592f58575807af92b06e38b4723
+-- hash: 0387683ca2ce4bfff32f8a67e41b3fb0b708f2a3c511ff0efa4aab0b183588c8
 
 name:           ntfd
 version:        0.1.0
@@ -56,7 +56,8 @@ library
     , dbus
     , directory
     , filepath
-    , http-conduit
+    , http-io-streams
+    , io-streams
     , libmpd
     , microstache
     , parsec
@@ -85,7 +86,8 @@ executable ntfd
     , dbus
     , directory
     , filepath
-    , http-conduit
+    , http-io-streams
+    , io-streams
     , libmpd
     , microstache
     , ntfd
@@ -121,7 +123,8 @@ test-suite ntfd-test
     , directory
     , filepath
     , hspec
-    , http-conduit
+    , http-io-streams
+    , io-streams
     , libmpd
     , microstache
     , ntfd

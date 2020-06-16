@@ -29,13 +29,14 @@ dependencies:
 - aeson
 - tomland
 - async
-- http-conduit
 - microstache
 - parsec
 - dbus
 - libmpd
 - directory
 - filepath
+- io-streams
+- http-io-streams
 
 default-extensions:
 - OverloadedStrings
@@ -66,6 +67,7 @@ executables:
     # so Docker can build static binaries.
     # It's used in by Docker builds, don't remove it.
     ## ghc-options:
+    ## - -threaded
     ## - -O2
     ## - -fPIC
     ## - -fllvm

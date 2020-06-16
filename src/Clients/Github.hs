@@ -1,5 +1,6 @@
 module Clients.Github
     ( fetchNotifications
+    , getAvatarPath
     , parseBytes
     , RestNotification(..)
     , NotificationType(..)
@@ -7,15 +8,18 @@ module Clients.Github
     )
 where
 
-import Control.Exception (try)
+import Control.Exception (try, IOException)
 import Data.Aeson ((.:), eitherDecode, withArray, withObject, Value(..))
 import Data.Aeson.Types (parseEither, Parser)
 import Data.Bifunctor (first)
-import Data.ByteString.Lazy (ByteString)
+import Data.ByteString.Lazy (fromStrict, toStrict, ByteString)
 import Data.Maybe (isNothing)
-import Data.Text (Text)
+import Data.Text (replace, toLower, unpack, Text)
 import Data.Text.Lazy.Encoding (encodeUtf8)
-import Network.HTTP.Simple
+import Network.Http.Client
+import System.FilePath (joinPath)
+import System.Directory (createDirectoryIfMissing, doesFileExist)
+import qualified Data.ByteString as B
 import qualified Data.Vector as V
 
 import Config (GithubConfig(..))
@@ -42,17 +46,40 @@ data NotificationType
 -- Fetch Github notifications
 fetchNotifications :: GithubConfig -> IO (Either Error [RestNotification])
 fetchNotifications cfg = do
-    baseRequest <- parseRequest "GET https://api.github.com/notifications"
-    let
-        request = setRequestHeader "Authorization" authHeader
-            $ setRequestHeader "User-Agent" userAgentHeader baseRequest
-    res <- try $ httpLbs request
+    ctx <- baselineContextSSL
+    let connection = openConnectionSSL ctx "api.github.com" 443
+    res <- try $ withConnection connection getBytes
     pure $ case res of
         Left  e -> Left $ Client e
-        Right r -> parseBytes $ getResponseBody r
+        Right r -> parseBytes $ fromStrict r
   where
-    authHeader      = ["token " <> githubApiKey cfg]
-    userAgentHeader = ["ntfd"]
+    request = buildRequest1 $ do
+        http GET "/notifications"
+        setAccept "application/json"
+        setHeader "Authorization" ("token " <> githubApiKey cfg)
+        setHeader "User-Agent"    "ntfd"
+    getBytes c = do
+        sendRequest c request emptyBody
+        receiveResponse c concatHandler
+
+-- Returns the local path to a github avatar, fetching and caching it if necessary
+getAvatarPath :: GithubConfig -> Text -> ByteString -> IO (Either Error FilePath)
+getAvatarPath cfg repoName avatarUrl = do
+    let expectedPath = normalizePath
+    exists <- doesFileExist expectedPath
+    if exists
+        then pure $ Right expectedPath
+        else do
+            createDirectoryIfMissing True avatarDir
+            writeRes <- first Client <$> try (fetchAvatar avatarUrl expectedPath)
+            pure $ writeRes >> Right expectedPath
+  where
+    avatarDir     = githubAvatarDir cfg
+    normalizePath = joinPath [avatarDir, unpack $ normalizeName repoName]
+    normalizeName name = (toLower . replace "/" "__") name
+    fetchAvatar url path = do
+        bytes <- get (toStrict url) concatHandler
+        B.writeFile path bytes
 
 -- Parse the bytestring response
 parseBytes :: ByteString -> Either Error [RestNotification]
@@ -89,5 +116,5 @@ parseNotif = withObject "notification" $ \o -> do
 data Error
     = Parse String -- ^ Github responded with an unexpected JSON object.
     | InvalidJson String -- ^ Github responded with invalid JSON.
-    | Client HttpException -- ^ Other type of errors returned by the underlying client.
+    | Client IOException -- ^ Other type of errors returned by the underlying client.
     deriving (Show)

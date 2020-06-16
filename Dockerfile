@@ -2,7 +2,7 @@ FROM alpine:3.12 as builder
 
 # Dev dependencies
 RUN apk --no-cache add --repository http://dl-cdn.alpinelinux.org/alpine/edge/community \
-        ca-certificates git ghc=8.8.3-r0 upx curl musl-dev gmp-dev zlib-dev zlib-static glib-static pcre-dev libx11-dev libxrandr-dev
+        ca-certificates git ghc=8.8.3-r0 libressl-dev curl musl-dev gmp-dev zlib-dev zlib-static glib-static pcre-dev libx11-dev libxrandr-dev
 
 # Stack
 RUN curl -L https://github.com/commercialhaskell/stack/releases/download/v2.3.1/stack-2.3.1-linux-x86_64-static.tar.gz | tar -xz ; \

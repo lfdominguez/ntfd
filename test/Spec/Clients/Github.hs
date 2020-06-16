@@ -5,7 +5,9 @@ import Test.Hspec
 import qualified Data.ByteString.Lazy as B
 
 import Spec.Helpers (defaultGithubCfg)
-import Clients.Github (fetchNotifications, parseBytes, NotificationType(..), RestNotification(..))
+import Config.Github (GithubConfig(..))
+import Clients.Github
+    (fetchNotifications, getAvatarPath, parseBytes, NotificationType(..), RestNotification(..))
 
 spec :: IO ()
 spec = hspec $ describe "Github client" $ do
@@ -22,3 +24,12 @@ spec = hspec $ describe "Github client" $ do
         config        <- defaultGithubCfg
         notifications <- fetchNotifications config
         notifications `shouldSatisfy` isRight
+
+    it "should save project avatar from Github" $ do
+        defaultCfg <- defaultGithubCfg
+        let config = defaultCfg { githubAvatarDir = "test-artefacts/github_avatar" }
+        bytes <- B.readFile "test/samples/new_github_event.json"
+        let Right [parsed] = parseBytes bytes
+        path <- getAvatarPath config (repoFullName parsed) (avatarUrl parsed)
+        print path
+        pure ()
