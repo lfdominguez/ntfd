@@ -28,7 +28,9 @@ loadWeatherConfig toml = do
     withEnv parsed = do
         apiKey <- loadSecret $ apiKeySrc parsed
         pure $ build apiKey parsed
-    build Nothing _ = Left MissingApiKey
+    build Nothing parsed
+        | not (enabled parsed) = Left Disabled
+        | otherwise            = Left MissingApiKey
     build (Just key) parsed
         | not (enabled parsed) = Left Disabled
         | otherwise = Right WeatherConfig

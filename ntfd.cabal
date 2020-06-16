@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 0387683ca2ce4bfff32f8a67e41b3fb0b708f2a3c511ff0efa4aab0b183588c8
+-- hash: c4e4b9e2d1ab9a2c1ec60331a6139e7718137121b01ba2c2c5f546e7ba8217fb
 
 name:           ntfd
 version:        0.1.0
@@ -48,7 +48,8 @@ library
   default-extensions: OverloadedStrings RecordWildCards NamedFieldPuns ScopedTypeVariables
   ghc-options: -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat -Widentities -Wredundant-constraints -Wmissing-export-lists -Wpartial-fields
   build-depends:
-      aeson
+      JuicyPixels
+    , aeson
     , async
     , base >=4.7 && <5
     , bytestring
@@ -78,7 +79,8 @@ executable ntfd
   default-extensions: OverloadedStrings RecordWildCards NamedFieldPuns ScopedTypeVariables
   ghc-options: -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat -Widentities -Wredundant-constraints -Wmissing-export-lists -Wpartial-fields
   build-depends:
-      aeson
+      JuicyPixels
+    , aeson
     , async
     , base >=4.7 && <5
     , bytestring
@@ -114,7 +116,8 @@ test-suite ntfd-test
   default-extensions: OverloadedStrings RecordWildCards NamedFieldPuns ScopedTypeVariables
   ghc-options: -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat -Widentities -Wredundant-constraints -Wmissing-export-lists -Wpartial-fields -Wno-incomplete-uni-patterns -Wno-missing-export-lists -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      aeson
+      JuicyPixels
+    , aeson
     , async
     , base >=4.7 && <5
     , bytestring

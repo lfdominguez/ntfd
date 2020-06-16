@@ -29,7 +29,9 @@ loadGithubConfig toml = do
         apiKey   <- loadSecret $ apiKeySrc parsed
         cacheDir <- expandPath "~/.cache/ntfd/github_avatars"
         pure $ build apiKey cacheDir parsed
-    build Nothing _ _ = Left MissingApiKey
+    build Nothing _ parsed
+        | not (enabled parsed) = Left Disabled
+        | otherwise            = Left MissingApiKey
     build (Just key) cacheDir parsed
         | not (enabled parsed) = Left Disabled
         | otherwise = Right GithubConfig

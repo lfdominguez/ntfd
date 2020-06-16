@@ -8,6 +8,7 @@ module Clients.Github
     )
 where
 
+import Codec.Picture (readImage, saveJpgImage)
 import Control.Exception (try, IOException)
 import Data.Aeson ((.:), eitherDecode, withArray, withObject, Value(..))
 import Data.Aeson.Types (parseEither, Parser)
@@ -71,15 +72,22 @@ getAvatarPath cfg repoName avatarUrl = do
         then pure $ Right expectedPath
         else do
             createDirectoryIfMissing True avatarDir
-            writeRes <- first Client <$> try (fetchAvatar avatarUrl expectedPath)
-            pure $ writeRes >> Right expectedPath
+            writeRes  <- first Client <$> try (fetchAvatar avatarUrl expectedPath)
+            converted <- convertImage expectedPath
+            pure $ writeRes >> converted >> Right expectedPath
   where
     avatarDir     = githubAvatarDir cfg
     normalizePath = joinPath [avatarDir, unpack $ normalizeName repoName]
-    normalizeName name = (toLower . replace "/" "__") name
+    normalizeName n = (toLower . replace "/" "__") n <> ".jpg"
     fetchAvatar url path = do
         bytes <- get (toStrict url) concatHandler
         B.writeFile path bytes
+    convertImage path = do
+        let outPath = path <> "lol"
+        img <- first Convert <$> readImage path
+        case img of
+            Right i -> saveJpgImage 10 outPath i >> pure (Right path)
+            Left  e -> pure $ Left e
 
 -- Parse the bytestring response
 parseBytes :: ByteString -> Either Error [RestNotification]
@@ -117,4 +125,5 @@ data Error
     = Parse String -- ^ Github responded with an unexpected JSON object.
     | InvalidJson String -- ^ Github responded with invalid JSON.
     | Client IOException -- ^ Other type of errors returned by the underlying client.
+    | Convert String -- ^ Avatar conversion error
     deriving (Show)
