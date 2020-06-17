@@ -5,17 +5,20 @@ module Stores.Github
     )
 where
 
+import Control.Concurrent.Async (mapConcurrently)
 import Control.Concurrent (newEmptyMVar, tryReadMVar, tryTakeMVar, putMVar, MVar)
 import Data.Aeson ((.=), object)
 import Data.Bifunctor (first)
-import Data.ByteString.Lazy (ByteString)
+import Data.Either (rights)
+import Data.List ((\\))
 import Data.Text (Text)
 import Data.Text.Lazy (toStrict, fromStrict)
+import GHC.Natural (intToNatural)
 import Numeric.Natural (Natural)
 import Text.Microstache (compileMustacheText, renderMustacheW, MustacheWarning)
 import Text.Parsec (ParseError)
 
-import Clients.Github (fetchNotifications, RestNotification(..), NotificationType)
+import Clients.Github (fetchNotifications, getAvatarPath, RestNotification(..))
 import Config (GithubConfig(..))
 import qualified Clients.Github as Gh
 
@@ -24,8 +27,14 @@ class Store s where
     -- | Initialize the store
     initGithubStore :: GithubConfig -> IO s
     -- | Synchronize local data with the Github API.
-    -- Boolean value can be used to know whether or not notifications should be sent.
-    syncGithub :: s ->  IO (Either Error Bool)
+    -- Returns an array of notification IDs for which we should send a desktop notification
+    syncGithub :: s ->  IO (Either Error [Text])
+    -- | Get the number of unread notifications
+    -- (everything marked as unread in your inbox)
+    getUnreadNotificationCount :: s -> IO (Maybe Natural)
+    -- | Get the number of brand new notifications
+    -- (notifications from an issue, PR ... that you have never seen so far)
+    getFistTimeNotificationCount :: s -> IO (Maybe Natural)
     -- | Get a rendered version of the configured template
     getRenderedTemplate :: s -> IO (Either Error Text)
 
@@ -43,7 +52,8 @@ data InternalState = InternalState
 
 -- Actual github data
 data GithubData = GithubData
-    { unreadNotifications :: Natural
+    { unreadNotificationCount :: Natural
+    , firstTimeNotificationCount :: Natural
     , notifications :: [GithubNotification]
     }
 
@@ -63,34 +73,55 @@ instance Store GithubClient where
         case notifs of
             Right restNotifs -> do
                 -- Build new state
-                let unreadNotifications = unreadCount
-                    notifications       = toCompleteNotif restNotifs
-                    gData               = GithubData { .. }
-                    renderedTemplate    = renderTemplate gData template
-                    state               = InternalState { githubData = gData, .. }
+                notifications <- toStoreNotifs restNotifs
+                let unreadNotificationCount    = unreadCount restNotifs
+                    firstTimeNotificationCount = firstTimeCount restNotifs
+                    gData                      = GithubData { .. }
+                    renderedTemplate           = renderTemplate gData template
+                    state                      = InternalState { githubData = gData, .. }
                 -- Update store
                 oldState <- tryTakeMVar mvar
                 putMVar mvar state
-                pure $ Right $ shouldNotify (githubData <$> oldState)
+                pure $ Right $ shouldNotify oldState state
             -- Report failure otherwise
             Left e -> pure $ Left $ GithubApi e
       where
-        cfg          = config s
-        mvar         = internalState s
-        template     = githubTemplate cfg
-        shouldNotify = undefined
-        unreadCount  = undefined
-        toCompleteNotif r = undefined
+        cfg            = config s
+        mvar           = internalState s
+        template       = githubTemplate cfg
+        unreadCount    = intToNatural . length
+        firstTimeCount = intToNatural . length . filter isNew
+        shouldNotify maybeOldState newState = case maybeOldState of
+            Just oldState -> (notificationIds newState) \\ (notificationIds oldState)
+            Nothing       -> []
+        notificationIds ns =
+            map (notificationId . restNotification) $ (notifications . githubData) ns
+        toStoreNotifs ns = do
+            notifications <- mapConcurrently toStoreNotif ns
+            pure $ rights notifications
+        toStoreNotif restNotification = do
+            let name = repoFullName restNotification
+            let url  = avatarUrl restNotification
+            path <- getAvatarPath cfg name url
+            pure $ path >>= \avatarPath -> Right GithubNotification { .. }
+
+    getUnreadNotificationCount s = do
+        state <- tryReadMVar $ internalState s
+        pure $ unreadNotificationCount . githubData <$> state
+
+    getFistTimeNotificationCount s = do
+        state <- tryReadMVar $ internalState s
+        pure $ firstTimeNotificationCount . githubData <$> state
 
     getRenderedTemplate s = do
         state <- tryReadMVar $ internalState s
         pure $ case state of
             Nothing -> Left Unsynchronized
-            Just w  -> renderedTemplate w
+            Just st -> renderedTemplate st
 
 -- brittany-disable-next-binding
 renderTemplate :: GithubData -> Text -> Either Error Text
-renderTemplate w t = do
+renderTemplate gh t = do
     -- Compile user provided template
     template <- first Parse $ compileMustacheText "github template" $ fromStrict t
     -- Render it
@@ -99,9 +130,11 @@ renderTemplate w t = do
         (errs, _  ) -> Left $ Render errs
   where
     payload = object
-        [ "notification_count" .= notifCount
+        [ "unread_count" .= notifCount
+        , "first_time_count" .= firstTimeCount
         ]
-    notifCount = unreadNotifications w
+    notifCount = length $ notifications gh
+    firstTimeCount = length $ filter isNew $ map restNotification (notifications gh)
 
 -- | Error types the store might return.
 data Error

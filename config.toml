@@ -52,8 +52,9 @@ show_avatar = true
 sync_frequency = 30
 # Output format, using Handlebars syntax, meaning variables should be used like {{ this }}
 # Available tokens are:
-# - notification_count
-display = " {{ notification_count }}"
+# - unread_count
+# - first_time_count
+display = " {{ unread_count }}"
 
 # MPD configuration
 [mpd]

@@ -37,7 +37,6 @@ dependencies:
 - filepath
 - io-streams
 - http-io-streams
-- JuicyPixels
 
 default-extensions:
 - OverloadedStrings
