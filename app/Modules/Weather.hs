@@ -4,8 +4,10 @@ module Modules.Weather
 where
 
 import Control.Monad (forever)
+import Data.Maybe (fromMaybe)
+import Data.Either (fromRight)
 import Data.Time.Clock (secondsToNominalDiffTime)
-import Data.Text (Text)
+import Data.Text (unpack, Text)
 import DBus.Client
     ( autoMethod
     , defaultInterface
@@ -19,7 +21,7 @@ import DBus.Client
 
 import Config (WeatherConfig(..))
 import Types.Weather (convert, Temperature(..), Unit(..))
-import Helpers (capitalize, notify, sleep, fromEither, fromMaybe, NotificationType(..))
+import Helpers (capitalize, notify, sleep, NotificationType(..))
 import qualified Stores.Weather as WS
 
 -- "all strings" version of the weather DBus API, this is meant to be convenient to use
@@ -34,13 +36,14 @@ weatherStringsSvc dbusClient config = do
         case shouldNotify of
             Right True -> do
                 let body    = weatherNotifBody config
-                let timeout = weatherNotifTimeout config
-                title <- capitalize . fromMaybe <$> WS.getForecastDescription store
+                let timeout = weatherNotifTime config
+                title <- capitalize . fromMaybe "" <$> WS.getForecastDescription store
                 icon  <- WS.getForecastSymbolic store
                 sleep delay
-                notify dbusClient Weather title body icon timeout
-            _ -> pure ()
-        sleep $ weatherSyncFreq config - delay
+                notify dbusClient Weather title body (unpack <$> icon) timeout
+                sleep $ weatherSyncFreq config - delay
+
+            _ -> sleep $ weatherSyncFreq config
   where
     interface s = defaultInterface
         { interfaceName       = "openweathermap.strings"
@@ -48,7 +51,7 @@ weatherStringsSvc dbusClient config = do
         , interfaceProperties = properties s
         }
     renderedTemplate s =
-        readOnlyProperty "RenderedTemplate" $ fromEither <$> WS.getRenderedTemplate s
+        readOnlyProperty "RenderedTemplate" $ fromRight "" <$> WS.getRenderedTemplate s
     currentIcon s = readOnlyProperty "CurrentIcon" $ fromIcon <$> WS.getCurrentIcon s
     forecastIcon s = readOnlyProperty "ForecastIcon" $ fromIcon <$> WS.getForecastIcon s
     currentTemp s = autoMethod "CurrentTemperature" $ currentTemperature s

@@ -34,13 +34,13 @@ loadWeatherConfig toml = do
     build (Just key) parsed
         | not (enabled parsed) = Left Disabled
         | otherwise = Right WeatherConfig
-            { weatherEnabled      = enabled parsed
-            , weatherApiKey       = encodeUtf8 key
-            , weatherCityId       = encodeUtf8 $ cityId parsed
-            , weatherNotifBody    = notifBody parsed
-            , weatherNotifTimeout = toDiffTime $ notifTimeout parsed
-            , weatherSyncFreq     = normalizeDuration 600 $ syncFrequency parsed
-            , weatherTemplate     = template parsed
+            { weatherEnabled   = enabled parsed
+            , weatherApiKey    = encodeUtf8 key
+            , weatherCityId    = encodeUtf8 $ cityId parsed
+            , weatherNotifBody = notifBody parsed
+            , weatherNotifTime = toDiffTime $ notifTime parsed
+            , weatherSyncFreq  = normalizeDuration 600 $ syncFrequency parsed
+            , weatherTemplate  = template parsed
             }
 
 -- | OpenWeatherMap configuration options required by the application
@@ -49,7 +49,7 @@ data WeatherConfig = WeatherConfig
     , weatherApiKey :: ByteString
     , weatherCityId :: ByteString
     , weatherNotifBody :: Text
-    , weatherNotifTimeout :: NominalDiffTime
+    , weatherNotifTime :: NominalDiffTime
     , weatherSyncFreq :: NominalDiffTime
     , weatherTemplate :: Text
     } deriving (Show)
@@ -60,7 +60,7 @@ data TomlWeatherConfig = TomlWeatherConfig
     , apiKeySrc :: Text
     , cityId :: Text
     , notifBody :: Text
-    , notifTimeout :: Natural
+    , notifTime :: Natural
     , syncFrequency :: Natural
     , template :: Text
     }
@@ -72,6 +72,6 @@ weatherCodec = TomlWeatherConfig
     <*> Toml.text "api_key" .= apiKeySrc
     <*> Toml.text "city_id" .= cityId
     <*> Toml.text "notification_body" .= notifBody
-    <*> Toml.natural "notification_timeout" .= notifTimeout
+    <*> Toml.natural "notification_timeout" .= notifTime
     <*> Toml.natural "sync_frequency" .= syncFrequency
     <*> Toml.text "display" .= template

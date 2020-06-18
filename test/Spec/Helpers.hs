@@ -27,7 +27,7 @@ defaultMpdCfg :: MpdConfig
 defaultMpdCfg = MpdConfig
     { mpdEnabled          = True
     , mpdMusicDirectory   = "/home/musicguy/collection"
-    , mpdNotifTimeout     = secondsToNominalDiffTime 10
+    , mpdNotifTime        = secondsToNominalDiffTime 10
     , mpdCoverName        = "cover.jpg"
     , mpdSkipMissingCover = True
     }
@@ -36,13 +36,13 @@ defaultWeatherCfg :: IO WeatherConfig
 defaultWeatherCfg = do
     apiKey <- lookupEnv "OWM_API_KEY"
     pure WeatherConfig
-        { weatherEnabled      = True
-        , weatherApiKey       = fromJust $ pack <$> apiKey
-        , weatherCityId       = "6077243"
-        , weatherNotifTimeout = secondsToNominalDiffTime 10
-        , weatherNotifBody    = "hullo"
-        , weatherSyncFreq     = secondsToNominalDiffTime 1800
-        , weatherTemplate     =
+        { weatherEnabled   = True
+        , weatherApiKey    = fromJust $ pack <$> apiKey
+        , weatherCityId    = "6077243"
+        , weatherNotifTime = secondsToNominalDiffTime 10
+        , weatherNotifBody = "hullo"
+        , weatherSyncFreq  = secondsToNominalDiffTime 1800
+        , weatherTemplate  =
             "{{ temp_icon }} {{ temp_celcius }}°C {{ trend }} {{ forecast_icon }} {{ forecast_celcius }}°C"
         }
 

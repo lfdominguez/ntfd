@@ -3,8 +3,6 @@ module Helpers
     , notify
     , sleep
     , capitalize
-    , fromEither
-    , fromMaybe
     , toDiffTime
     , normalizeDuration
     , NotificationType(..)
@@ -13,6 +11,7 @@ where
 
 import Control.Concurrent (threadDelay)
 import Data.Int (Int32)
+import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import Data.Time.Clock (secondsToNominalDiffTime, NominalDiffTime)
 import Data.Word (Word32)
@@ -29,6 +28,7 @@ data NotificationType
     = Weather
     | Mpd
     | Twitch
+    | Github Word32
     deriving (Show, Eq)
 
 -- | Convert a natural number (in seconds) to a nominal diff time.
@@ -56,18 +56,8 @@ capitalize text = case T.uncons text of
     Nothing     -> text
     Just (h, t) -> let lowered = T.toLower t in T.cons (C.toUpper h) lowered
 
--- The following functions help mapping our data types to work around DBus' lack of null type
--- Usefull to return empty strings.
-fromEither :: (Monoid t) => Either e t -> t
-fromEither (Left  _) = mempty
-fromEither (Right t) = t
-
-fromMaybe :: (Monoid t) => Maybe t -> t
-fromMaybe Nothing  = mempty
-fromMaybe (Just t) = t
-
 -- | Send a desktop notification via DBus.
-notify :: Client -> NotificationType -> Text -> Text -> Maybe Text -> NominalDiffTime -> IO ()
+notify :: Client -> NotificationType -> Text -> Text -> Maybe FilePath -> NominalDiffTime -> IO ()
 notify client nType title text icon timeout = callNoReply client params
   where
     params = (methodCall objectPath interface methodName)
@@ -77,13 +67,14 @@ notify client nType title text icon timeout = callNoReply client params
     objectPath = "/org/freedesktop/Notifications"
     interface  = "org.freedesktop.Notifications"
     methodName = "Notify"
-    appName    = "ntfd" :: Text
-    appIcon    = fromMaybe icon
-    replaceId Weather = 1
-    replaceId Mpd     = 2
-    replaceId Twitch  = 3
+    appName    = "ntfd"
+    appIcon    = fromMaybe "" icon
+    replaceId Weather      = 1
+    replaceId Mpd          = 2
+    replaceId Twitch       = 3
+    replaceId (Github nid) = nid
     args =
-        [ toVariant appName
+        [ toVariant (appName :: Text)
         , toVariant (replaceId nType :: Word32)
         , toVariant appIcon
         , toVariant title

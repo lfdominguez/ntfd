@@ -41,7 +41,12 @@ data NotificationType
     = PullRequest
     | Issue
     | Notification -- catch all, possible types are undocumented ...
-    deriving (Show, Eq)
+    deriving (Eq)
+
+instance Show NotificationType where
+    show PullRequest  = "pull request"
+    show Issue        = "issue"
+    show Notification = "thread"
 
 -- Fetch Github notifications
 fetchNotifications :: GithubConfig -> IO (Either Error [RestNotification])

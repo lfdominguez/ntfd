@@ -1,6 +1,8 @@
 module Stores.Github
     ( Store(..)
     , Error(..)
+    , GithubNotification(..)
+    , RestNotification(..)
     , GithubClient
     )
 where
@@ -29,6 +31,8 @@ class Store s where
     -- | Synchronize local data with the Github API.
     -- Returns an array of notification IDs for which we should send a desktop notification
     syncGithub :: s ->  IO (Either Error [Text])
+    -- | Get all notifications currently marked as unread from the inbox
+    getNotifications :: s -> IO [GithubNotification]
     -- | Get the number of unread notifications
     -- (everything marked as unread in your inbox)
     getUnreadNotificationCount :: s -> IO (Maybe Natural)
@@ -92,8 +96,8 @@ instance Store GithubClient where
         unreadCount    = intToNatural . length
         firstTimeCount = intToNatural . length . filter isNew
         shouldNotify maybeOldState newState = case maybeOldState of
-            Just oldState -> (notificationIds newState) \\ (notificationIds oldState)
-            Nothing       -> []
+            Just oldState -> notificationIds newState \\ notificationIds oldState
+            Nothing       -> notificationIds newState
         notificationIds ns =
             map (notificationId . restNotification) $ (notifications . githubData) ns
         toStoreNotifs ns = do
@@ -104,6 +108,10 @@ instance Store GithubClient where
             let url  = avatarUrl restNotification
             path <- getAvatarPath cfg name url
             pure $ path >>= \avatarPath -> Right GithubNotification { .. }
+
+    getNotifications s = do
+        state <- tryReadMVar $ internalState s
+        pure $ maybe [] (notifications . githubData) state
 
     getUnreadNotificationCount s = do
         state <- tryReadMVar $ internalState s

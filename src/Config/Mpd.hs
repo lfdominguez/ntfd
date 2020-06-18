@@ -35,7 +35,7 @@ loadMpdConfig toml = do
             { mpdEnabled          = enabled parsed
             , mpdMusicDirectory   = musicDir
             , mpdCoverName        = coverName parsed
-            , mpdNotifTimeout     = toDiffTime $ notifTimeout parsed
+            , mpdNotifTime        = toDiffTime $ notifTime parsed
             , mpdSkipMissingCover = skipMissingCover parsed
             }
 
@@ -44,7 +44,7 @@ data MpdConfig = MpdConfig
     { mpdEnabled :: Bool
     , mpdMusicDirectory :: FilePath
     , mpdCoverName :: String
-    , mpdNotifTimeout :: NominalDiffTime
+    , mpdNotifTime :: NominalDiffTime
     , mpdSkipMissingCover :: Bool
     } deriving (Show)
 
@@ -53,7 +53,7 @@ data TomlMpdConfig = TomlMpdConfig
     { enabled :: Bool
     , musicDirectory :: FilePath
     , coverName :: String
-    , notifTimeout :: Natural
+    , notifTime :: Natural
     , skipMissingCover :: Bool
     }
 
@@ -63,5 +63,5 @@ mpdCodec = TomlMpdConfig
     <$> Toml.bool "enabled" .= enabled
     <*> Toml.string "music_directory" .= musicDirectory
     <*> Toml.string "cover_name" .= coverName
-    <*> Toml.natural "notification_timeout" .= notifTimeout
+    <*> Toml.natural "notification_timeout" .= notifTime
     <*> Toml.bool "skip_missing_cover" .= skipMissingCover
