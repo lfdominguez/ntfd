@@ -1,13 +1,13 @@
 # OpenWeatherMap configuration
 [openweathermap]
 # Enable / disable OpenWeatherMap integration
-enabled = false
+enabled = true
 # Register at https://openweathermap.org to get your API key
 # Use one of the following forms to set your API key:
 # api_key = "file:~/your_folder/some-key.txt"   # Read from a file
 # api_key = "env:OWM_API_KEY"                   # Read from an environment variable
 # api_key = "PLAINTEXT_VALUE"                   # Read the value directly
-api_key = "file:~/.config/ntfd/openweathermap.txt"
+api_key = "env:OWM_API_KEY"
 # This is for Montreal, find your city at https://openweathermap.org
 # The id will be the last part of the URL
 city_id = "6077243"
@@ -30,19 +30,19 @@ sync_frequency = 1800 # 30 minutes
 # - forecast_kelvin
 # - forecast_fahrenheit
 # - forecast_icon
-display = "{{ temp_icon }} {{ temp_celcius }}°C {{ trend }} {{ forecast_icon }} {{ forecast_celcius }}°C"
+display = "{{ temp_icon }}  {{ temp_celcius }}°C  {{ trend }}  {{ forecast_icon }}  {{ forecast_celcius }}°C"
 
 # GitHub configuration
 [github]
 # Enable / disable GitHub integration
-enabled = false
+enabled = true
 # Go to https://github.com/settings/tokens
 # Click on "Generate a new token", give it a name and check the "notifications" checkbox
 # Use one of the following forms to set your token:
 # api_key = "file:~/your_folder/some-token.txt"   # Read from a file
 # api_key = "env:GITHUB_TOKEN"                    # Read from an environment variable
 # api_key = "PLAINTEXT_VALUE"                     # Read the value directly
-api_key = "file:~/.config/ntfd/github.txt"
+api_key = "env:GITHUB_TOKEN"
 # How long GitHub notifications should stay up (in seconds)
 notification_timeout = 20
 # Whether or not the organization/owner avatar should be shown in the notification
@@ -59,7 +59,7 @@ display = " {{ unread_count }}"
 # MPD configuration
 [mpd]
 # Enable / disable mpd integration
-enabled = false
+enabled = true
 # Top level directory containing your MPD collection
 # Should be the same value as "music_directory" from your mpd.conf
 music_directory = "/mnt/media/music"
@@ -74,6 +74,6 @@ skip_missing_cover = true
 # Twitch configuration
 [twitch]
 # Enable / disable Twitch integration
-enabled = false
+enabled = true
 # Twitch client id for ntfd, you probably don't want to change that
 client_id = "3szce2tmzmjbvug7x3fkiwhe5xgk3f"

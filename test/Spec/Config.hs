@@ -1,10 +1,11 @@
 module Spec.Config where
 
 import Data.Maybe (isJust)
-import Data.Text (breakOnEnd, pack)
+import Data.Text (breakOn, breakOnEnd, pack)
 import Test.Hspec
 
-import Config (loadConfig, Config(..), MpdConfig(..), WeatherConfig(..), ConfigError(..))
+import Config
+    (loadConfig, Config(..), MpdConfig(..), GithubConfig(..), WeatherConfig(..), ConfigError(..))
 import Config.Env (expandPath, loadSecret)
 
 spec :: IO ()
@@ -20,7 +21,7 @@ spec = hspec $ describe "Configuration" $ do
         mpdConfigErr `shouldBe` Disabled
 
     it "should read test config file (everything enabled)" $ do
-        toml <- loadConfig "test/Spec/test-config.toml"
+        toml <- loadConfig "test/samples/test_config.toml"
         let Right config        = toml
 
         let Right weatherConfig = weatherCfg config
@@ -28,6 +29,14 @@ spec = hspec $ describe "Configuration" $ do
         let cityId              = weatherCityId weatherConfig
         weatherOn `shouldBe` True
         cityId `shouldBe` "6077243"
+
+        let Right githubConfig = githubCfg config
+        let githubOn           = githubEnabled githubConfig
+        let withAvatars        = githubShowAvatar githubConfig
+        let (_, cacheDir) = breakOn ".cache/ntfd" $ pack $ githubAvatarDir githubConfig
+        githubOn `shouldBe` True
+        withAvatars `shouldBe` True
+        cacheDir `shouldBe` ".cache/ntfd/github_avatars"
 
         let Right mpdConfig = mpdCfg config
         let mpdOn           = mpdEnabled mpdConfig
@@ -45,7 +54,7 @@ spec = hspec $ describe "Configuration" $ do
         full `shouldBe` fullPath
 
     it "should load secrets from different sources" $ do
-        secretFile <- loadSecret "file:test/Spec/test-token.txt"
+        secretFile <- loadSecret "file:test/samples/test_github_token.txt"
         secretFile `shouldBe` Just "some-secret-token"
 
         secretEnv <- loadSecret "env:OWM_API_KEY"

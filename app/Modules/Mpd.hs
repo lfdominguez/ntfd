@@ -12,10 +12,9 @@ import Network.MPD
 import System.Directory (doesFileExist)
 import System.FilePath (joinPath, splitFileName)
 import qualified Data.Map as M
-import qualified Data.Text as T
 
 import Helpers (notify, NotificationType(..))
-import Config (GlobalConfig(..), MpdConfig(..))
+import Config (MpdConfig(..))
 
 -- MPD notification service, watches player state changes and sends
 -- notifications on track change
@@ -51,13 +50,13 @@ mpdNotifSvc client config = do
             (Just [title], Just [artist], Just [album], _) -> do
                 let nHead    = toText title
                 let nBody    = toText artist <> " - " <> toText album
-                let nTimeout = (notificationTimeout . mpdGlobalCfg) config
+                let nTimeout = mpdNotifTime config
                 when (shouldNotify cover) $ notify client Mpd nHead nBody cover nTimeout
             -- Streaming content
             (Just [title], _, _, Just [name]) -> do
                 let nHead    = toText title
                 let nBody    = toText name
-                let nTimeout = (notificationTimeout . mpdGlobalCfg) config
+                let nTimeout = mpdNotifTime config
                 when (shouldNotify cover) $ notify client Mpd nHead nBody cover nTimeout
             _ -> pure ()
     getCoverPath song = do
@@ -66,7 +65,7 @@ mpdNotifSvc client config = do
         let (songDir, _) = splitFileName $ (toString . sgFilePath) song
         let coverPath    = joinPath [musicDir, songDir, coverFile]
         hasCover <- doesFileExist coverPath
-        pure $ if hasCover then Just (T.pack coverPath) else Nothing
+        pure $ if hasCover then Just coverPath else Nothing
     shouldNotify coverPath =
         let
             hasCover   = isJust coverPath

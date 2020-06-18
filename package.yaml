@@ -1,5 +1,5 @@
 name:                ntfd
-version:             0.1.0
+version:             0.2.0
 github:              "kamek-pf/ntfd"
 license:             GPL-3
 author:              "Bertrand Bousquet"
@@ -29,13 +29,15 @@ dependencies:
 - aeson
 - tomland
 - async
-- http-conduit
 - microstache
 - parsec
 - dbus
 - libmpd
 - directory
 - filepath
+- io-streams
+- http-io-streams
+- random
 
 default-extensions:
 - OverloadedStrings
@@ -65,7 +67,8 @@ executables:
     # This block messes up stack commands, we only need it
     # so Docker can build static binaries.
     # It's used in by Docker builds, don't remove it.
-    ## ghc-options:
+    ghc-options:
+    - -threaded
     ## - -O2
     ## - -fPIC
     ## - -fllvm

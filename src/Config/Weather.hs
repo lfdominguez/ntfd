@@ -7,7 +7,7 @@ where
 import Data.Bifunctor (first)
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
-import Data.Time.Clock (secondsToNominalDiffTime, NominalDiffTime)
+import Data.Time.Clock (NominalDiffTime)
 import Data.ByteString (ByteString)
 import Numeric.Natural (Natural)
 import Toml ((.=), decode, TomlCodec)
@@ -15,11 +15,11 @@ import qualified Toml
 
 import Config.Env (loadSecret)
 import Config.Error (ConfigError(..))
-import Config.Global (GlobalConfig)
+import Helpers (normalizeDuration, toDiffTime)
 
 -- | Load weather configuration from raw TOML content
-loadWeatherConfig :: Text -> GlobalConfig -> IO (Either ConfigError WeatherConfig)
-loadWeatherConfig toml global = do
+loadWeatherConfig :: Text -> IO (Either ConfigError WeatherConfig)
+loadWeatherConfig toml = do
     let decoded = decode (Toml.table weatherCodec "openweathermap") toml
     case first ParseError decoded of
         Left  e      -> pure $ Left e
@@ -28,31 +28,28 @@ loadWeatherConfig toml global = do
     withEnv parsed = do
         apiKey <- loadSecret $ apiKeySrc parsed
         pure $ build apiKey parsed
-    build Nothing _ = Left MissingApiKey
+    build Nothing parsed
+        | not (enabled parsed) = Left Disabled
+        | otherwise            = Left MissingApiKey
     build (Just key) parsed
         | not (enabled parsed) = Left Disabled
         | otherwise = Right WeatherConfig
-            { weatherGlobalCfg = global
-            , weatherEnabled   = enabled parsed
+            { weatherEnabled   = enabled parsed
             , weatherApiKey    = encodeUtf8 key
             , weatherCityId    = encodeUtf8 $ cityId parsed
             , weatherNotifBody = notifBody parsed
-            , weatherSyncFreq  = toDiffTime $ syncFrequency parsed
+            , weatherNotifTime = toDiffTime $ notifTime parsed
+            , weatherSyncFreq  = normalizeDuration 600 $ syncFrequency parsed
             , weatherTemplate  = template parsed
             }
-    toDiffTime val =
-        let
-            asInteger  = toInteger val
-            normalized = if asInteger < 600 then 600 else asInteger
-        in secondsToNominalDiffTime $ fromInteger normalized
 
 -- | OpenWeatherMap configuration options required by the application
 data WeatherConfig = WeatherConfig
-    { weatherGlobalCfg :: GlobalConfig
-    , weatherEnabled :: Bool
+    { weatherEnabled :: Bool
     , weatherApiKey :: ByteString
     , weatherCityId :: ByteString
     , weatherNotifBody :: Text
+    , weatherNotifTime :: NominalDiffTime
     , weatherSyncFreq :: NominalDiffTime
     , weatherTemplate :: Text
     } deriving (Show)
@@ -63,6 +60,7 @@ data TomlWeatherConfig = TomlWeatherConfig
     , apiKeySrc :: Text
     , cityId :: Text
     , notifBody :: Text
+    , notifTime :: Natural
     , syncFrequency :: Natural
     , template :: Text
     }
@@ -74,5 +72,6 @@ weatherCodec = TomlWeatherConfig
     <*> Toml.text "api_key" .= apiKeySrc
     <*> Toml.text "city_id" .= cityId
     <*> Toml.text "notification_body" .= notifBody
+    <*> Toml.natural "notification_timeout" .= notifTime
     <*> Toml.natural "sync_frequency" .= syncFrequency
     <*> Toml.text "display" .= template

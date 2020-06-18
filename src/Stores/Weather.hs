@@ -14,11 +14,11 @@ import Data.Text.Lazy (toStrict, fromStrict)
 import Text.Microstache (compileMustacheText, renderMustacheW, MustacheWarning)
 import Text.Parsec (ParseError)
 
-import qualified Clients.OpenWeatherMap as Owm
 import Clients.OpenWeatherMap
     (fetchOwm, isDegradedConditions, toSymbolicName, toWeatherIcon, OwmResponse(..), QueryType(..))
 import Types.Weather (convert, Temperature(..), Unit(..))
 import Config (WeatherConfig(..))
+import qualified Clients.OpenWeatherMap as Owm
 
 -- | Query and update Weather data.
 class Store s where
@@ -173,9 +173,9 @@ renderTemplate w t = do
         , "forecast_icon" .= forecastIcon w
         ]
     trend c f
-        | c < f = '\59621' -- ^ trending up
-        | c > f = '\59619' -- ^ trending down
-        | otherwise = '\59620' -- ^ flat
+        | c < f = '\59621' -- trending up
+        | c > f = '\59619' -- trending down
+        | otherwise = '\59620' -- flat
     valueAs target temp = let Temperature value _ = convert temp target in round value :: Int
     current = currentTemperature w
     forecast = forecastTemperature w

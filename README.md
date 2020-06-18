@@ -7,6 +7,11 @@ A lightweight notification daemon for fancy desktop integrations.
 `ntfd` synchronizes with different services and offers synchronous APIs for desktop integration via D-Bus. \
 It can be used as a data source for [Polybar](https://github.com/polybar/polybar), [Rofi](https://github.com/davatorium/rofi) or any other similar tool.
 
+<p align="center">
+    <img src="./screenshots/main.png" />
+</p>
+
+
 ## Installation
 Arch users can install [`ntfd-bin`](https://aur.archlinux.org/packages/ntfd-bin/) from the AUR. \
 Instructions to build from source can be found at the bottom of the README.
@@ -85,6 +90,31 @@ font-2 = Weather Icons:size=12;0
 ...
 ```
 
+## GitHub module
+<p align="center">
+    <img width="38%" src="./screenshots/github-notification.png" />
+</p>
+<p align="center">
+    <img src="./screenshots/github-polybar.png" />
+</p>
+
+The GitHub module sends desktop notifications when there's activity on GitHub. \
+It exposes a D-Bus similar to the weather module.
+
+#### Polybar integration
+The screenshots shows the number of currently unread notifications . \
+Edit the `~/.config/ntfd/config.toml` and follow the instructions. \
+For Polybar integration like in the example, update your Polybar config like so:
+```
+[module/github]
+type = custom/script
+exec = busctl --user -j get-property io.ntfd /github github.strings RenderedTemplate | jq -r .data
+interval = 10
+label-font = 3
+```
+I recommend a 10 second interval, this way the bar will stay in sync with the notifications. \
+The example in the default config file needs the Octicons font to render correctly.
+
 ## MPD module
 <p align="center">
     <img width="30%" src="./screenshots/mpd-notification.png" />
@@ -102,18 +132,20 @@ Integration with the following services is planned:
     - [x] Alerts through notifications
 - [x] MPD
     - [x] Desktop notifications
-- [ ] Github
-    - [ ] Unread notifications count
-    - [ ] Live notifications (?)
-- [ ] Twitch
-    - [ ] Live streams count (followed by the user)
-    - [ ] Rofi integration with [`mpv`](https://mpv.io/)
+- [x] Github
+    - [x] Unread notifications count
+    - [x] Live notifications
+- [ ] Arch
+    - [ ] Pacman updates ? (how ?)
 - [ ] Gmail
     - [ ] Live notifications
     - [ ] Unread messages count, multi account support
 - [ ] Facebook (?)
     - [ ] Live messages (?)
     - [ ] Unread notifications count (?)
+- [ ] Twitch
+    - [ ] Live streams count (followed by the user)
+    - [ ] Rofi integration with [`mpv`](https://mpv.io/)
 - [ ] Reddit (?)
 
 ## Build from source
@@ -123,6 +155,9 @@ docker build -t kamek-pf/ntfd .
 docker run --rm -ti -v $(pwd):/mnt kamek-pf/ntfd /bin/sh -c 'cp ntfd /mnt'
 ```
 The binary will be available as `ntfd` from the project's root.
+
+## Run tests
+The test suite expects a valid `OWM_API_KEY` and `GITHUB_TOKEN` environment variables. Simply run `stack test`.
 
 ## Troubleshooting
 

@@ -11,6 +11,7 @@ import System.Directory (getXdgDirectory, XdgDirectory(..))
 import System.Exit (exitFailure)
 
 import Config (loadConfig, Config(..))
+import Modules.Github (githubStringsSvc)
 import Modules.Weather (weatherStringsSvc)
 import Modules.Mpd (mpdNotifSvc)
 
@@ -33,10 +34,10 @@ main = do
         exitFailure
 
     -- Prepare services
+    let githubSvc   = githubStringsSvc client <$> githubCfg config
     let weatherSvc  = weatherStringsSvc client <$> weatherCfg config
     let mpdSvc      = mpdNotifSvc client <$> mpdCfg config
-    let allServices = [weatherSvc, mpdSvc]
-
+    let allServices = [githubSvc, weatherSvc, mpdSvc]
     -- Log which services failed to initialize / are disabled
     -- print $ lefts allServices
 

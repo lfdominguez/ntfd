@@ -9,14 +9,14 @@ module Clients.OpenWeatherMap
     )
 where
 
-import Control.Exception (try)
+import Control.Exception (try, IOException)
 import Data.Aeson ((.:), eitherDecode, withObject, Value(..), Object)
 import Data.Aeson.Types (parseEither, Parser)
 import Data.Bifunctor (first)
-import Data.ByteString.Lazy (ByteString)
+import Data.ByteString.Lazy (fromStrict, ByteString)
 import Data.Text (Text)
 import Data.Vector ((!?))
-import Network.HTTP.Simple
+import Network.Http.Client
 
 import Config (WeatherConfig(..))
 
@@ -32,21 +32,23 @@ data OwmResponse = OwmResponse
 -- Fetch weather data from OpenWeatherMap - Results are always in Celcius
 fetchOwm :: WeatherConfig -> QueryType -> IO (Either Error OwmResponse)
 fetchOwm cfg queryType = do
-    baseRequest <- parseRequest "GET http://api.openweathermap.org/"
-    let request = setRequestPath (endpoint queryType) $ setRequestQueryString params baseRequest
-    res <- try $ httpLbs request
+    ctx <- baselineContextSSL
+    let connection = openConnectionSSL ctx "api.openweathermap.org" 443
+    res <- try $ withConnection connection getBytes
     pure $ case res of
         Left  e -> Left $ Client e
-        Right r -> parseResponse (getResponseBody r) queryType
+        Right r -> parseResponse (fromStrict r) queryType
   where
-    endpoint Current  = "/data/2.5/weather"
-    endpoint Forecast = "/data/2.5/forecast"
-    params =
-        [ ("appid", Just $ weatherApiKey cfg)
-        , ("id"   , Just $ weatherCityId cfg)
-        , ("units", Just "metric")
-        , ("cnt"  , Just "1")
-        ]
+    request = buildRequest1 $ do
+        http GET (endpoint queryType)
+        setAccept "application/json"
+    getBytes c = do
+        sendRequest c request emptyBody
+        receiveResponse c concatHandler
+    endpoint Current  = "/data/2.5/weather" <> getQueryString
+    endpoint Forecast = "/data/2.5/forecast" <> getQueryString
+    getQueryString =
+        "?" <> "appid=" <> weatherApiKey cfg <> "&id=" <> weatherCityId cfg <> "&units=metric&cnt=1"
 
 -- More details here: https://openweathermap.org/weather-conditions
 -- brittany-disable-next-binding
@@ -142,5 +144,5 @@ data QueryType
 data Error
     = Parse String -- ^ OpenWeatherMap responded with an unexpected JSON object.
     | InvalidJson String -- ^ OpenWeatherMap responded with invalid JSON.
-    | Client HttpException -- ^ Other type of errors returned by the underlying client.
+    | Client IOException -- ^ Other type of errors returned by the underlying client.
     deriving (Show)
