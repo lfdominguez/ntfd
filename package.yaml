@@ -1,5 +1,5 @@
 name:                ntfd
-version:             0.2.0
+version:             0.2.1
 github:              "kamek-pf/ntfd"
 license:             GPL-3
 author:              "Bertrand Bousquet"
@@ -35,7 +35,6 @@ dependencies:
 - libmpd
 - directory
 - filepath
-- io-streams
 - http-io-streams
 - random
 
@@ -44,6 +43,7 @@ default-extensions:
 - RecordWildCards
 - NamedFieldPuns
 - ScopedTypeVariables
+- TupleSections
 
 ghc-options:
 - -Wall

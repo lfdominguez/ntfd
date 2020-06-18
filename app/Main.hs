@@ -3,9 +3,10 @@ module Main
     )
 where
 
-import Control.Monad (when)
+import Control.Monad (unless, when)
 import Control.Concurrent.Async (async, waitAny)
-import Data.Either (rights)
+import Data.Bifunctor (first)
+import Data.Either (partitionEithers)
 import DBus.Client (connectSession, requestName, RequestNameReply(..))
 import System.Directory (getXdgDirectory, XdgDirectory(..))
 import System.Exit (exitFailure)
@@ -33,15 +34,26 @@ main = do
         putStrLn "Another service is connected to DBus as \"io.ntfd\""
         exitFailure
 
-    -- Prepare services
-    let githubSvc   = githubStringsSvc client <$> githubCfg config
-    let weatherSvc  = weatherStringsSvc client <$> weatherCfg config
-    let mpdSvc      = mpdNotifSvc client <$> mpdCfg config
-    let allServices = [githubSvc, weatherSvc, mpdSvc]
+    -- Prepare services, partition by config validity
+    let allServices =
+            [ githubStringsSvc client <$> first ("Github", ) (githubCfg config)
+            , weatherStringsSvc client <$> first ("Weather", ) (weatherCfg config)
+            , mpdNotifSvc client <$> first ("mpd", ) (mpdCfg config)
+            ]
+        (invalid, valid) = partitionEithers allServices
+
     -- Log which services failed to initialize / are disabled
-    -- print $ lefts allServices
+    unless (null invalid) $ do
+        putStrLn "The following modules were ignored: "
+        mapM_ (\(name, err) -> putStrLn $ " - " <> name <> " (" <> show err <> ")") invalid
+        putStrLn ""
+
+    -- Make sure at least one module is enabled
+    when (null valid) $ do
+        putStrLn "Could not start any module, exiting."
+        exitFailure
 
     -- Spawn threads and wait forever, or until one of them fails
-    services <- mapM async $ rights allServices
+    services <- mapM async valid
     _        <- waitAny services
     exitFailure
