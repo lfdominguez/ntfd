@@ -3,10 +3,6 @@ module Config
     , Config(..)
     , ConfigError(..)
 
-    -- Twitch config
-    , loadTwitchConfig
-    , TwitchConfig(..)
-
     -- Weather config
     , loadWeatherConfig
     , WeatherConfig(..)
@@ -26,15 +22,13 @@ import Data.Bifunctor (first)
 import qualified Data.Text.IO as TIO
 
 import Config.Github
-import Config.Twitch
 import Config.Weather
 import Config.Mpd
 import Config.Error
 
 -- | ntfd main configuration
 data Config = Config
-    { twitchCfg :: Either ConfigError TwitchConfig -- ^ Twitch configuration options
-    , weatherCfg :: Either ConfigError WeatherConfig -- ^ OpenWeatherMap configuration options
+    { weatherCfg :: Either ConfigError WeatherConfig -- ^ OpenWeatherMap configuration options
     , githubCfg :: Either ConfigError GithubConfig -- ^ Github configuration options
     , mpdCfg :: Either ConfigError MpdConfig -- ^ MPD configuration options
     } deriving (Show)
@@ -47,7 +41,6 @@ loadConfig path = do
         Left  e       -> pure $ Left e
   where
     builder content = do
-        let twitchCfg = loadTwitchConfig content
         mpdCfg     <- loadMpdConfig content
         weatherCfg <- loadWeatherConfig content
         githubCfg  <- loadGithubConfig content

@@ -9,6 +9,7 @@ where
 
 import Control.Concurrent.Async (mapConcurrently)
 import Control.Concurrent (newEmptyMVar, tryReadMVar, tryTakeMVar, putMVar, MVar)
+import Control.Monad (when)
 import Data.Aeson ((.=), object)
 import Data.Bifunctor (first)
 import Data.Either (rights)
@@ -132,6 +133,8 @@ renderTemplate :: GithubData -> Text -> Either Error Text
 renderTemplate gh t = do
     -- Compile user provided template
     template <- first Parse $ compileMustacheText "github template" $ fromStrict t
+    -- Make sure we have some unread notifications
+    when (unreadNotificationCount gh == 0) $ Left NoUnread
     -- Render it
     case renderMustacheW template payload of
         ([]  , res) -> Right $ toStrict res
@@ -147,6 +150,7 @@ renderTemplate gh t = do
 -- | Error types the store might return.
 data Error
     = Parse ParseError
+    | NoUnread
     | Render [MustacheWarning]
     | Unsynchronized
     | GithubApi Gh.Error

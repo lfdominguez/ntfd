@@ -70,10 +70,3 @@ notification_timeout = 10
 cover_name = "cover.jpg"
 # When this is enabled, songs with missing cover image will not trigger a notification
 skip_missing_cover = true
-
-# Twitch configuration
-[twitch]
-# Enable / disable Twitch integration
-enabled = true
-# Twitch client id for ntfd, you probably don't want to change that
-client_id = "3szce2tmzmjbvug7x3fkiwhe5xgk3f"

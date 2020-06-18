@@ -9,17 +9,14 @@ import Config (Config(..))
 import Config.Mpd (MpdConfig(..))
 import Config.Github (GithubConfig(..))
 import Config.Weather (WeatherConfig(..))
-import Config.Twitch (TwitchConfig(..))
 
 defaultCfg :: IO Config
 defaultCfg = do
     weather <- defaultWeatherCfg
     github  <- defaultGithubCfg
-    twitch  <- defaultTwitchCfg
     pure Config
         { weatherCfg = Right weather
         , githubCfg  = Right github
-        , twitchCfg  = Right twitch
         , mpdCfg     = Right defaultMpdCfg
         }
 
@@ -58,7 +55,3 @@ defaultGithubCfg = do
         , githubTemplate   = "{{ notification_count }}"
         , githubAvatarDir  = "/home/someone/.cache/ntfd/github_avatar"
         }
-
-defaultTwitchCfg :: IO TwitchConfig
-defaultTwitchCfg = do
-    pure TwitchConfig { twitchEnabled = True, twitchClientId = "3szce2tmzmjbvug7x3fkiwhe5xgk3f" }
