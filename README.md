@@ -14,6 +14,7 @@ It can be used as a data source for [Polybar](https://github.com/polybar/polybar
 
 ## Installation
 Arch users can install [`ntfd-bin`](https://aur.archlinux.org/packages/ntfd-bin/) from the AUR. \
+Other Linux users can either grab a statically linked binary from the [release page](https://github.com/kamek-pf/ntfd/releases) or build from source. \
 Instructions to build from source can be found at the bottom of the README.
 
 ## Configuration
