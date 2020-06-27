@@ -77,7 +77,8 @@ forecastTemperature client unit = do
 toTemperatureValue :: Text -> Maybe Temperature -> String
 toTemperatureValue _ Nothing = ""
 toTemperatureValue u (Just t)
-    | u == "celsius"    = asValue Celsius
+    | u == "celsius"    = asCelsius
+    | u == "celcius"    = asCelsius -- Stupid spelling error
     | u == "kelvin"     = asValue Kelvin
     | u == "fahrenheit" = asValue Fahrenheit
     | otherwise         = ""
@@ -88,3 +89,4 @@ toTemperatureValue u (Just t)
             converted = convert t unit
             rounded   = round $ value converted :: Integer
         in show rounded
+    asCelsius = asValue Celsius
