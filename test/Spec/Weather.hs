@@ -6,19 +6,19 @@ import Types.Weather (convert, Temperature(..), Unit(..))
 
 spec :: IO ()
 spec = hspec $ describe "Weather helpers" $ do
-    it "should convert Celcius to Fahrenheit" $ do
-        let left  = convert (Temperature 0 Celcius) Fahrenheit
+    it "should convert Celsius to Fahrenheit" $ do
+        let left  = convert (Temperature 0 Celsius) Fahrenheit
         let right = Temperature 32 Fahrenheit
         left `shouldBe` right
 
-    it "should convert Celcius to Kelvin" $ do
-        let left  = convert (Temperature (-50) Celcius) Kelvin
+    it "should convert Celsius to Kelvin" $ do
+        let left  = convert (Temperature (-50) Celsius) Kelvin
         let right = Temperature 223.15 Kelvin
         left `shouldBe` right
 
-    it "should convert Fahrenheit to Celcius" $ do
-        let left  = convert (Temperature 32 Fahrenheit) Celcius
-        let right = Temperature 0 Celcius
+    it "should convert Fahrenheit to Celsius" $ do
+        let left  = convert (Temperature 32 Fahrenheit) Celsius
+        let right = Temperature 0 Celsius
         left `shouldBe` right
 
     it "should convert Fahrenheit to Kelvin" $ do
@@ -26,9 +26,9 @@ spec = hspec $ describe "Weather helpers" $ do
         let right = Temperature 0 Kelvin
         left `shouldBe` right
 
-    it "should convert Kelvin to Celcius" $ do
-        let left  = convert (Temperature 223.15 Kelvin) Celcius
-        let right = Temperature (-50) Celcius
+    it "should convert Kelvin to Celsius" $ do
+        let left  = convert (Temperature 223.15 Kelvin) Celsius
+        let right = Temperature (-50) Celsius
         left `shouldBe` right
 
     it "should convert Kelvin to Fahrenheit" $ do
@@ -37,6 +37,6 @@ spec = hspec $ describe "Weather helpers" $ do
         left `shouldBe` right
 
     it "should perform equality checks on rounded values" $ do
-        let left  = Temperature 23.3 Celcius
-        let right = Temperature 23.4 Celcius
+        let left  = Temperature 23.3 Celsius
+        let right = Temperature 23.4 Celsius
         left `shouldBe` right

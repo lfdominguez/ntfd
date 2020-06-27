@@ -108,7 +108,7 @@ instance Store WeatherClient where
         cfg      = config s
         mvar     = internalState s
         template = weatherTemplate cfg
-        toTemperature res = Temperature (owmTemperature res) Celcius
+        toTemperature res = Temperature (owmTemperature res) Celsius
         toIcon res = toWeatherIcon $ owmIcon res
         shouldNotify Nothing newStatus = newStatus < 800
         shouldNotify (Just WeatherData { forecastStatus = old }) new = isDegradedConditions old new
@@ -162,12 +162,14 @@ renderTemplate w t = do
         (errs, _  ) -> Left $ Render errs
   where
     payload = object
-        [ "temp_celcius" .= valueAs Celcius current
+        [ "temp_celsius" .= celsiusCurrent
+        , "temp_celcius" .= celsiusCurrent -- I can't spell, but this is technically a breaking change so here we are
         , "temp_kelvin" .= valueAs Kelvin current
         , "temp_fahrenheit" .= valueAs Fahrenheit current
         , "temp_icon" .= currentIcon w
         , "trend" .= trend current forecast
-        , "forecast_celcius" .= valueAs Celcius forecast
+        , "forecast_celsius" .= celsiusForecast
+        , "forecast_celcius" .= celsiusForecast -- Same here
         , "forecast_kelvin" .= valueAs Kelvin forecast
         , "forecast_fahrenheit" .= valueAs Fahrenheit forecast
         , "forecast_icon" .= forecastIcon w
@@ -179,6 +181,8 @@ renderTemplate w t = do
     valueAs target temp = let Temperature value _ = convert temp target in round value :: Int
     current = currentTemperature w
     forecast = forecastTemperature w
+    celsiusCurrent = valueAs Celsius current
+    celsiusForecast = valueAs Celsius forecast
 
 -- | Error types the store might return.
 data Error

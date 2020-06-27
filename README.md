@@ -46,10 +46,10 @@ busctl --user -j get-property io.ntfd /weather openweathermap.strings RenderedTe
 
 DBus methods:
 ```sh
-# Supported units are "celcius", "kelvin" and "fahrenheit":
+# Supported units are "celsius", "kelvin" and "fahrenheit":
 
-# Current temperature in celcius:
-busctl --user -j call io.ntfd /weather openweathermap.strings CurrentTemperature s "celcius" | jq -r '.data[0]'
+# Current temperature in celsius:
+busctl --user -j call io.ntfd /weather openweathermap.strings CurrentTemperature s "celsius" | jq -r '.data[0]'
 
 # Forecast temperature in fahrenheit:
 busctl --user -j call io.ntfd /weather openweathermap.strings CurrentTemperature s "fahrenheit" | jq -r '.data[0]'

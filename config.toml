@@ -21,16 +21,16 @@ notification_body = "Expected within the next 3 hours"
 sync_frequency = 1800 # 30 minutes
 # Output format, using Handlebars syntax, meaning variables should be used like {{ this }}
 # Available tokens are:
-# - temp_celcius
+# - temp_celsius
 # - temp_kelvin
 # - temp_fahrenheit
 # - temp_icon
 # - trend
-# - forecast_celcius
+# - forecast_celsius
 # - forecast_kelvin
 # - forecast_fahrenheit
 # - forecast_icon
-display = "{{ temp_icon }} {{ temp_celcius }}°C {{ trend }} {{ forecast_icon }} {{ forecast_celcius }}°C"
+display = "{{ temp_icon }} {{ temp_celsius }}°C {{ trend }} {{ forecast_icon }} {{ forecast_celsius }}°C"
 
 # GitHub configuration
 [github]

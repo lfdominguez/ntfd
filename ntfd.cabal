@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5c65cbe28b69c38e82e5a4752f0a1469f44425a52ac3aac2d852a457124e9a85
+-- hash: 1791f4900b353472b60f8341699d027b2c0265ec1056c5841c62ab71ade9bcc7
 
 name:           ntfd
-version:        0.2.1
+version:        0.2.2
 description:    Please see the README on GitHub at <https://github.com/kamek-pf/ntfd#readme>
 homepage:       https://github.com/kamek-pf/ntfd#readme
 bug-reports:    https://github.com/kamek-pf/ntfd/issues

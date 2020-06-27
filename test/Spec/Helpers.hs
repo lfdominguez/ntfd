@@ -40,7 +40,7 @@ defaultWeatherCfg = do
         , weatherNotifBody = "hullo"
         , weatherSyncFreq  = secondsToNominalDiffTime 1800
         , weatherTemplate  =
-            "{{ temp_icon }} {{ temp_celcius }}°C {{ trend }} {{ forecast_icon }} {{ forecast_celcius }}°C"
+            "{{ temp_icon }} {{ temp_celsius }}°C {{ trend }} {{ forecast_icon }} {{ forecast_celcius }}°C" -- Spelling error in celsius on purpose ;/
         }
 
 defaultGithubCfg :: IO GithubConfig

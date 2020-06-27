@@ -29,7 +29,7 @@ data OwmResponse = OwmResponse
     }
     deriving (Show)
 
--- Fetch weather data from OpenWeatherMap - Results are always in Celcius
+-- Fetch weather data from OpenWeatherMap - Results are always in Celsius
 fetchOwm :: WeatherConfig -> QueryType -> IO (Either Error OwmResponse)
 fetchOwm cfg queryType = do
     ctx <- baselineContextSSL
