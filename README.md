@@ -103,7 +103,7 @@ The GitHub module sends desktop notifications when there's activity on GitHub. \
 It exposes a D-Bus similar to the weather module.
 
 #### Polybar integration
-The screenshots shows the number of currently unread notifications . \
+The screenshots shows the number of currently unread notifications. Nothing is rendered unless some notifications are unread. \
 Edit the `~/.config/ntfd/config.toml` and follow the instructions. \
 For Polybar integration like in the example, update your Polybar config like so:
 ```
