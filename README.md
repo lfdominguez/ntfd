@@ -9,8 +9,8 @@ It can be used as a data source for [Polybar](https://github.com/polybar/polybar
 
 <p align="center">
     <img src="./screenshots/main.png" />
+    <sub>ntfd feeding data to Polybar and Dunst</sub>
 </p>
-
 
 ## Installation
 Arch users can install [`ntfd-bin`](https://aur.archlinux.org/packages/ntfd-bin/) from the AUR. \
