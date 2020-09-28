@@ -33,7 +33,7 @@ data NotificationType
 
 -- | Convert a natural number (in seconds) to a nominal diff time.
 toDiffTime :: Natural -> NominalDiffTime
-toDiffTime = secondsToNominalDiffTime . fromInteger . toInteger
+toDiffTime = secondsToNominalDiffTime . fromIntegral
 
 -- | Convert a natural number and a fallback (both in seconds) to a nominal diff time.
 -- If the provided value is lower than the fallback, the fallback is used.
@@ -43,7 +43,7 @@ normalizeDuration duration fallback =
         nDuration  = toInteger duration
         nFallback  = toInteger fallback
         normalized = if nDuration < nFallback then nFallback else nDuration
-    in secondsToNominalDiffTime $ fromInteger normalized
+    in secondsToNominalDiffTime $ fromIntegral normalized
 
 -- | Wait for a given amount of time.
 sleep :: NominalDiffTime -> IO ()
