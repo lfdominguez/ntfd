@@ -83,11 +83,12 @@ exec = busctl --user -j get-property io.ntfd /weather openweathermap.strings Ren
 interval = 60
 label-font = 3
 ```
-I recommend a 60 second interval, this way the bar will stay in sync with the notifications.
-Don't forget to add Weather Icons to your config or it won't render correctly:
+I recommend a 60 second interval, this way the bar will stay in sync with the notifications. \
+Note that the Polybar integration depends on both [Weather Icons](https://aur.archlinux.org/packages/ttf-weather-icons) and [Material Icons](https://aur.archlinux.org/packages/ttf-material-design-icons), don't forget to add them to your config or it won't render correctly:
 ```
+font-1 = WeatherIcons:size=17
 ...
-font-2 = Weather Icons:size=12;0
+font-3 = MaterialIcons:size=19
 ...
 ```
 
