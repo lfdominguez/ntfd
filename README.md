@@ -115,7 +115,7 @@ interval = 10
 label-font = 3
 ```
 I recommend a 10 second interval, this way the bar will stay in sync with the notifications. \
-The example in the default config file needs the Octicons font to render correctly.
+The example in the default config file needs the [Octicons](https://aur.archlinux.org/packages/ttf-octicons/) font to render correctly.
 
 ## MPD module
 <p align="center">
