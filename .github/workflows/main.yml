@@ -24,5 +24,10 @@ jobs:
           name: lfdominguez
           signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
           extraPullNames: 'nix-community'
+          
+      - name: Add Custom Cache repo for haskell
+        run: |
+          sed "s|\(substituters.*\)|\1 https://cache.iog.io|" -i ~/.config/nix/nix.conf
+          sed "s|\(trusted-public-keys.*\)|\1 hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=|" -i ~/.config/nix/nix.conf
       
       - run: nix build 
