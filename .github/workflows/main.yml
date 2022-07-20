@@ -23,6 +23,6 @@ jobs:
         with:
           name: lfdominguez
           signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
-          extraPullNames: 'nix-community,https://cache.iog.io'
+          extraPullNames: 'nix-community'
       
       - run: nix build 
